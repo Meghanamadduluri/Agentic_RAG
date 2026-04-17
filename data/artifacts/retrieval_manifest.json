@@ -1,0 +1,6 @@
+{
+  "embedding_backend": "tfidf",
+  "collection_name": "framework_docs",
+  "chunk_count": 96,
+  "vectorizer_path": "/Users/Meghana/agentic-rag-framework-comparison/data/artifacts/tfidf_vectorizer.pkl"
+}

@@ -1,0 +1,8 @@
+Query Engine
+Concept
+A query engine takes in a natural language query, and returns a rich response. It is most often (but not always) built on one or many indexes via retrievers. You can compose multiple query engines to achieve more advanced capability.
+Usage Pattern
+To stream response:
+See the full usage pattern for more details.
+Modules
+Supporting Modules

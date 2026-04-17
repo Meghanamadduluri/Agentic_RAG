@@ -1,0 +1,19 @@
+Storing
+Concept
+Under the hood, Llama Index also supports swappable storage components that allows you to customize:
+- Document stores: where ingested documents (i.e.,
+objects) are stored, - Index stores: where index metadata are stored,
+- Vector stores: where embedding vectors are stored.
+- Property Graph stores: where knowledge graphs are stored (i.e. for
+Property Graph Index). - Chat Stores: where chat messages are stored and organized.
+The Document/Index stores rely on a common Key-Value store abstraction, which is also detailed below.
+Llama Index supports persisting data to any storage backend supported by fsspec. We have confirmed support for the following storage backends:
+- Local filesystem
+- AWS S3
+- Cloudflare R2
+Usage Pattern
+See our Vector Store Module Guide below for more details.
+Note that in general to use storage abstractions, you need to define a Storage Context
+object:
+More details on customization/persistence can be found in the guides below.
+Modules

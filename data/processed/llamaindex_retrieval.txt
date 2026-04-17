@@ -1,0 +1,739 @@
+Retrieval
+Evaluation modules.
+Answer Relevancy Evaluator #
+Bases: Base Evaluator
+Answer relevancy evaluator.
+Evaluates the relevancy of response to a query. This evaluator considers the query string and response string.
+Parameters:
+| Name | Type | Description | Default |
+raise_error
+Optional[bool]
+Whether to raise an error if the response is invalid. Defaults to False. |
+False
+eval_template
+Optional[Union[str, Base Prompt Template]]
+The template to use for evaluation. |
+refine_template
+Optional[Union[str, Base Prompt Template]]
+The template to use for refinement. |
+required |
+Source code in llama-index-core/llama_index/core/evaluation/answer_relevancy.py
+49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 |
+aevaluate
+async
+aevaluate (query: str | None = None,
+response: str | None = None,
+contexts: Sequence[str] | None = None,
+sleep_time_in_seconds: int = 0,
+**kwargs: Any) -> Evaluation Result
+Evaluate whether the response is relevant to the query.
+Source code in llama-index-core/llama_index/core/evaluation/answer_relevancy.py
+104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 |
+Base Evaluator #
+Bases: Prompt Mixin
+Base Evaluator class.
+Source code in llama-index-core/llama_index/core/evaluation/base.py
+46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 |
+evaluate #
+evaluate (query: Optional[str] = None,
+response: Optional[str] = None,
+contexts: Optional[Sequence[str]] = None,
+**kwargs: Any) -> Evaluation Result
+Run evaluation with query string, retrieved contexts, and generated response string.
+Subclasses can override this method to provide custom evaluation logic and take in additional arguments.
+Source code in llama-index-core/llama_index/core/evaluation/base.py
+53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 |
+aevaluate
+abstractmethod
+async
+aevaluate (query: Optional[str] = None,
+response: Optional[str] = None,
+contexts: Optional[Sequence[str]] = None,
+**kwargs: Any) -> Evaluation Result
+Run evaluation with query string, retrieved contexts, and generated response string.
+Subclasses can override this method to provide custom evaluation logic and take in additional arguments.
+Source code in llama-index-core/llama_index/core/evaluation/base.py
+76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 |
+evaluate_response #
+evaluate_response (query: Optional[str] = None,
+response: Optional[Response] = None,
+**kwargs: Any) -> Evaluation Result
+Run evaluation with query string and generated Response object.
+Subclasses can override this method to provide custom evaluation logic and take in additional arguments.
+Source code in llama-index-core/llama_index/core/evaluation/base.py
+93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 |
+aevaluate_response
+async
+aevaluate_response (query: Optional[str] = None,
+response: Optional[Response] = None,
+**kwargs: Any) -> Evaluation Result
+Run evaluation with query string and generated Response object.
+Subclasses can override this method to provide custom evaluation logic and take in additional arguments.
+Source code in llama-index-core/llama_index/core/evaluation/base.py
+115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 |
+Evaluation Result #
+Bases: Base Model
+Evaluation result.
+Output of an Base Evaluator.
+Parameters:
+| Name | Type | Description | Default |
+query
+str | None
+Query string |
+contexts
+Sequence[str] | None
+Context strings |
+response
+str | None
+Response string |
+passing
+bool | None
+Binary evaluation result (passing or not) |
+feedback
+str | None
+Feedback or reasoning for the response |
+score
+float | None
+Score for the response |
+pairwise_source
+str | None
+Used only for pairwise and specifies whether it is from original order of presented answers or flipped order |
+invalid_result
+Whether the evaluation result is an invalid one. |
+False
+invalid_reason
+str | None
+Reason for invalid evaluation. |
+Source code in llama-index-core/llama_index/core/evaluation/base.py
+12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 |
+Batch Eval Runner #
+Batch evaluation runner.
+Parameters:
+| Name | Type | Description | Default |
+evaluators
+Dict[str, Base Evaluator]
+Dictionary of evaluators. |
+required |
+workers
+Number of workers to use for parallelization. Defaults to 2. |
+show_progress
+Whether to show progress bars. Defaults to False. |
+False
+Source code in llama-index-core/llama_index/core/evaluation/batch_runner.py
+75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 349 350 351 352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 367 368 369 370 371 372 373 374 375 376 377 378 379 380 381 382 383 384 385 386 387 388 389 390 391 392 393 394 395 396 397 398 399 400 401 402 403 404 405 406 407 408 409 410 |
+aevaluate_response_strs
+async
+aevaluate_response_strs (queries: Optional[List[str]] = None,
+response_strs: Optional[List[str]] = None,
+contexts_list: Optional[List[List[str]]] = None,
+**eval_kwargs_lists: Dict[str, Any]) -> Dict[str, List[Evaluation Result]]
+Evaluate query, response pairs.
+This evaluates queries, responses, contexts as string inputs. Can supply additional kwargs to the evaluator in eval_kwargs_lists.
+Parameters:
+| Name | Type | Description | Default |
+queries
+Optional[List[str]]
+List of query strings. Defaults to None. |
+response_strs
+Optional[List[str]]
+List of response strings. Defaults to None. |
+contexts_list
+Optional[List[List[str]]]
+List of context lists. Defaults to None. |
+**eval_kwargs_lists
+Dict[str, Any]
+Dict of either dicts or lists of kwargs to pass to evaluator. Defaults to None. multiple evaluators: {evaluator: {kwarg: [list of values]},...} single evaluator: {kwarg: [list of values]} |
+Source code in llama-index-core/llama_index/core/evaluation/batch_runner.py
+195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 |
+aevaluate_responses
+async
+aevaluate_responses (queries: Optional[List[str]] = None,
+responses: Optional[List[Response]] = None,
+**eval_kwargs_lists: Dict[str, Any]) -> Dict[str, List[Evaluation Result]]
+Evaluate query, response pairs.
+This evaluates queries and response objects.
+Parameters:
+| Name | Type | Description | Default |
+queries
+Optional[List[str]]
+List of query strings. Defaults to None. |
+responses
+Optional[List[Response]]
+List of response objects. Defaults to None. |
+**eval_kwargs_lists
+Dict[str, Any]
+Dict of either dicts or lists of kwargs to pass to evaluator. Defaults to None. multiple evaluators: {evaluator: {kwarg: [list of values]},...} single evaluator: {kwarg: [list of values]} |
+Source code in llama-index-core/llama_index/core/evaluation/batch_runner.py
+261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 |
+aevaluate_queries
+async
+aevaluate_queries (query_engine: Base Query Engine,
+queries: Optional[List[str]] = None,
+**eval_kwargs_lists: Dict[str, Any]) -> Dict[str, List[Evaluation Result]]
+Evaluate queries.
+Parameters:
+| Name | Type | Description | Default |
+query_engine
+Base Query Engine
+Query engine. |
+required |
+queries
+Optional[List[str]]
+List of query strings. Defaults to None. |
+**eval_kwargs_lists
+Dict[str, Any]
+Dict of lists of kwargs to pass to evaluator. Defaults to None. |
+Source code in llama-index-core/llama_index/core/evaluation/batch_runner.py
+319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 |
+evaluate_response_strs #
+evaluate_response_strs (queries: Optional[List[str]] = None,
+response_strs: Optional[List[str]] = None,
+contexts_list: Optional[List[List[str]]] = None,
+**eval_kwargs_lists: Dict[str, Any]) -> Dict[str, List[Evaluation Result]]
+Evaluate query, response pairs.
+Sync version of aevaluate_response_strs.
+Source code in llama-index-core/llama_index/core/evaluation/batch_runner.py
+350 351 352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 367 368 369 370 |
+evaluate_responses #
+evaluate_responses (queries: Optional[List[str]] = None,
+responses: Optional[List[Response]] = None,
+**eval_kwargs_lists: Dict[str, Any]) -> Dict[str, List[Evaluation Result]]
+Evaluate query, response objs.
+Sync version of aevaluate_responses.
+Source code in llama-index-core/llama_index/core/evaluation/batch_runner.py
+372 373 374 375 376 377 378 379 380 381 382 383 384 385 386 387 388 389 390 |
+evaluate_queries #
+evaluate_queries (query_engine: Base Query Engine,
+queries: Optional[List[str]] = None,
+**eval_kwargs_lists: Dict[str, Any]) -> Dict[str, List[Evaluation Result]]
+Evaluate queries.
+Sync version of aevaluate_queries.
+Source code in llama-index-core/llama_index/core/evaluation/batch_runner.py
+392 393 394 395 396 397 398 399 400 401 402 403 404 405 406 407 408 409 410 |
+Context Relevancy Evaluator #
+Bases: Base Evaluator
+Context relevancy evaluator.
+Evaluates the relevancy of retrieved contexts to a query. This evaluator considers the query string and retrieved contexts.
+Parameters:
+| Name | Type | Description | Default |
+raise_error
+Optional[bool]
+Whether to raise an error if the response is invalid. Defaults to False. |
+False
+eval_template
+Optional[Union[str, Base Prompt Template]]
+The template to use for evaluation. |
+refine_template
+Optional[Union[str, Base Prompt Template]]
+The template to use for refinement. |
+Source code in llama-index-core/llama_index/core/evaluation/context_relevancy.py
+66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 |
+aevaluate
+async
+aevaluate (query: str | None = None,
+response: str | None = None,
+contexts: Sequence[str] | None = None,
+sleep_time_in_seconds: int = 0,
+**kwargs: Any) -> Evaluation Result
+Evaluate whether the contexts is relevant to the query.
+Source code in llama-index-core/llama_index/core/evaluation/context_relevancy.py
+130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 |
+Correctness Evaluator #
+Bases: Base Evaluator
+Correctness evaluator.
+Evaluates the correctness of a question answering system.
+This evaluator depends on reference
+answer to be provided, in addition to the
+query string and response string.
+It outputs a score between 1 and 5, where 1 is the worst and 5 is the best, along with a reasoning for the score. Passing is defined as a score greater than or equal to the given threshold.
+Parameters:
+| Name | Type | Description | Default |
+eval_template
+Optional[Union[Base Prompt Template, str]]
+Template for the evaluation prompt. |
+score_threshold
+float
+Numerical threshold for passing the evaluation, defaults to 4.0. |
+Source code in llama-index-core/llama_index/core/evaluation/correctness.py
+69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 |
+Dataset Generator #
+Bases: Prompt Mixin
+Generate dataset (question/ question-answer pairs) based on the given documents.
+NOTE: this is a beta feature, subject to change!
+Parameters:
+| Name | Type | Description | Default |
+nodes
+List[Node]
+List of nodes. (Optional) |
+required |
+llm
+Language model. |
+callback_manager
+Callback Manager
+Callback manager. |
+num_questions_per_chunk
+number of question to be generated per chunk. Each document is chunked of size 512 words. |
+text_question_template
+Base Prompt Template | None
+Question generation template. |
+question_gen_query
+str | None
+Question generation query. |
+Source code in llama-index-core/llama_index/core/evaluation/dataset_generation.py
+113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 |
+from_documents
+classmethod
+from_documents (documents: List[Document],
+llm: Optional[LLM] = None,
+transformations: Optional[
+List[Transform Component]
+] = None,
+callback_manager: Optional[Callback Manager] = None,
+num_questions_per_chunk: int = 10,
+text_question_template: (Base Prompt Template | None) = None,
+text_qa_template: Base Prompt Template | None = None,
+question_gen_query: str | None = None,
+required_keywords: List[str] | None = None,
+exclude_keywords: List[str] | None = None,
+show_progress: bool = False,) -> Dataset Generator
+Generate dataset from documents.
+Source code in llama-index-core/llama_index/core/evaluation/dataset_generation.py
+165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 |
+agenerate_questions_from_nodes
+async
+agenerate_questions_from_nodes (num: int | None = None,) -> List[str]
+Generates questions for each document.
+Source code in llama-index-core/llama_index/core/evaluation/dataset_generation.py
+agenerate_dataset_from_nodes
+async
+agenerate_dataset_from_nodes (num: int | None = None,) -> Query Response Dataset
+Generates questions for each document.
+Source code in llama-index-core/llama_index/core/evaluation/dataset_generation.py
+generate_questions_from_nodes #
+generate_questions_from_nodes (num: int | None = None,) -> List[str]
+Generates questions for each document.
+Source code in llama-index-core/llama_index/core/evaluation/dataset_generation.py
+generate_dataset_from_nodes #
+generate_dataset_from_nodes (num: int | None = None,) -> Query Response Dataset
+Generates questions for each document.
+Source code in llama-index-core/llama_index/core/evaluation/dataset_generation.py
+Query Response Dataset #
+Bases: Base Model
+Query Response Dataset.
+The response can be empty if the dataset is generated from documents.
+Parameters:
+| Name | Type | Description | Default |
+queries
+Dict[str, str]
+Query id -> query. |
+<class 'dict'>
+responses
+Dict[str, str]
+Query id -> response. |
+<class 'dict'>
+Source code in llama-index-core/llama_index/core/evaluation/dataset_generation.py
+48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 |
+from_qr_pairs
+classmethod
+from_qr_pairs (qr_pairs: List[Tuple[str, str]]) -> Query Response Dataset
+Create from qr pairs.
+Source code in llama-index-core/llama_index/core/evaluation/dataset_generation.py
+save_json #
+save_json (path: str) -> None
+Save json.
+Source code in llama-index-core/llama_index/core/evaluation/dataset_generation.py
+from_json
+classmethod
+from_json (path: str) -> Query Response Dataset
+Load json.
+Source code in llama-index-core/llama_index/core/evaluation/dataset_generation.py
+Faithfulness Evaluator #
+Bases: Base Evaluator
+Faithfulness evaluator.
+Evaluates whether a response is faithful to the contexts (i.e. whether the response is supported by the contexts or hallucinated.)
+This evaluator only considers the response string and the list of context strings.
+Parameters:
+| Name | Type | Description | Default |
+raise_error
+Whether to raise an error when the response is invalid. Defaults to False. |
+False
+eval_template
+Optional[Union[str, Base Prompt Template]]
+The template to use for evaluation. |
+refine_template
+Optional[Union[str, Base Prompt Template]]
+The template to use for refining the evaluation. |
+Source code in llama-index-core/llama_index/core/evaluation/faithfulness.py
+98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 |
+aevaluate
+async
+aevaluate (query: str | None = None,
+response: str | None = None,
+contexts: Sequence[str] | None = None,
+sleep_time_in_seconds: int = 0,
+**kwargs: Any) -> Evaluation Result
+Evaluate whether the response is faithful to the contexts.
+Source code in llama-index-core/llama_index/core/evaluation/faithfulness.py
+159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 |
+Guideline Evaluator #
+Bases: Base Evaluator
+Guideline evaluator.
+Evaluates whether a query and response pair passes the given guidelines.
+This evaluator only considers the query string and the response string.
+Parameters:
+| Name | Type | Description | Default |
+guidelines
+Optional[str]
+User-added guidelines to use for evaluation. Defaults to None, which uses the default guidelines. |
+eval_template
+Optional[Union[str, Base Prompt Template]]
+The template to use for evaluation. |
+Source code in llama-index-core/llama_index/core/evaluation/guideline.py
+41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 |
+aevaluate
+async
+aevaluate (query: Optional[str] = None,
+response: Optional[str] = None,
+contexts: Optional[Sequence[str]] = None,
+sleep_time_in_seconds: int = 0,
+**kwargs: Any) -> Evaluation Result
+Evaluate whether the query and response pair passes the guidelines.
+Source code in llama-index-core/llama_index/core/evaluation/guideline.py
+89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 |
+Pairwise Comparison Evaluator #
+Bases: Base Evaluator
+Pairwise comparison evaluator.
+Evaluates the quality of a response vs. a "reference" response given a question by having an LLM judge which response is better.
+Outputs whether the response
+given is better than the reference
+response.
+Parameters:
+| Name | Type | Description | Default |
+eval_template
+Optional[Union[str, Base Prompt Template]]
+The template to use for evaluation. |
+enforce_consensus
+Whether to enforce consensus (consistency if we flip the order of the answers). Defaults to True. |
+Source code in llama-index-core/llama_index/core/evaluation/pairwise.py
+92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 |
+Relevancy Evaluator #
+Bases: Base Evaluator
+Relenvancy evaluator.
+Evaluates the relevancy of retrieved contexts and response to a query. This evaluator considers the query string, retrieved contexts, and response string.
+Parameters:
+| Name | Type | Description | Default |
+raise_error
+Optional[bool]
+Whether to raise an error if the response is invalid. Defaults to False. |
+False
+eval_template
+Optional[Union[str, Base Prompt Template]]
+The template to use for evaluation. |
+refine_template
+Optional[Union[str, Base Prompt Template]]
+The template to use for refinement. |
+Source code in llama-index-core/llama_index/core/evaluation/relevancy.py
+42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 |
+aevaluate
+async
+aevaluate (query: str | None = None,
+response: str | None = None,
+contexts: Sequence[str] | None = None,
+sleep_time_in_seconds: int = 0,
+**kwargs: Any) -> Evaluation Result
+Evaluate whether the contexts and response are relevant to the query.
+Source code in llama-index-core/llama_index/core/evaluation/relevancy.py
+97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 |
+Base Retrieval Evaluator #
+Bases: Base Model
+Base Retrieval Evaluator class.
+Parameters:
+| Name | Type | Description | Default |
+metrics
+List[Base Retrieval Metric]
+List of metrics to evaluate |
+required |
+Source code in llama-index-core/llama_index/core/evaluation/retrieval/base.py
+77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 |
+from_metric_names
+classmethod
+from_metric_names (metric_names: List[str], **kwargs: Any) -> Base Retrieval Evaluator
+Create evaluator from metric names.
+Parameters:
+| Name | Type | Description | Default |
+metric_names
+List[str]
+List of metric names |
+required |
+**kwargs
+Additional arguments for the evaluator |
+Source code in llama-index-core/llama_index/core/evaluation/retrieval/base.py
+85 86 87 88 89 90 91 92 93 94 95 96 97 98 |
+evaluate #
+evaluate (query: str,
+expected_ids: List[str],
+expected_texts: Optional[List[str]] = None,
+mode: Retrieval Eval Mode = TEXT,
+**kwargs: Any) -> Retrieval Eval Result
+Run evaluation results with query string and expected ids.
+Parameters:
+| Name | Type | Description | Default |
+query
+Query string |
+required |
+expected_ids
+List[str]
+Expected ids |
+required |
+Returns:
+| Name | Type | Description |
+Retrieval Eval Result |
+Retrieval Eval Result
+Evaluation result |
+Source code in llama-index-core/llama_index/core/evaluation/retrieval/base.py
+107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 |
+aevaluate
+async
+aevaluate (query: str,
+expected_ids: List[str],
+expected_texts: Optional[List[str]] = None,
+mode: Retrieval Eval Mode = TEXT,
+**kwargs: Any) -> Retrieval Eval Result
+Run evaluation with query string, retrieved contexts, and generated response string.
+Subclasses can override this method to provide custom evaluation logic and take in additional arguments.
+Source code in llama-index-core/llama_index/core/evaluation/retrieval/base.py
+137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 |
+aevaluate_dataset
+async
+aevaluate_dataset (dataset: Embedding QAFinetune Dataset,
+workers: int = 2,
+show_progress: bool = False,
+**kwargs: Any) -> List[Retrieval Eval Result]
+Run evaluation with dataset.
+Source code in llama-index-core/llama_index/core/evaluation/retrieval/base.py
+172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 |
+Retrieval Eval Result #
+Bases: Base Model
+Retrieval eval result.
+NOTE: this abstraction might change in the future.
+Attributes:
+| Name | Type | Description |
+Parameters:
+| Name | Type | Description | Default |
+query
+Query string |
+required |
+expected_ids
+List[str]
+Expected ids |
+required |
+expected_texts
+List[str] | None
+Expected texts associated with nodes provided in |
+retrieved_ids
+List[str]
+Retrieved ids |
+required |
+retrieved_texts
+List[str]
+Retrieved texts |
+required |
+Retrieval Eval Mode
+text or image |
+<Retrieval Eval Mode. TEXT: 'text'>
+metric_dict
+Dict[str, Retrieval Metric Result]
+Metric dictionary for the evaluation |
+required |
+Source code in llama-index-core/llama_index/core/evaluation/retrieval/base.py
+36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 |
+Multi Modal Retriever Evaluator #
+Bases: Base Retrieval Evaluator
+Retriever evaluator.
+This module will evaluate a retriever using a set of metrics.
+Parameters:
+| Name | Type | Description | Default |
+metrics
+List[Base Retrieval Metric]
+Sequence of metrics to evaluate |
+required |
+retriever
+Base Retriever
+Retriever to evaluate. |
+required |
+node_postprocessors
+List[Annotated[Base Node Postprocessor, Serialize As Any]] | None
+Post-processor to apply after retrieval. |
+Source code in llama-index-core/llama_index/core/evaluation/retrieval/evaluator.py
+53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 |
+Retriever Evaluator #
+Bases: Base Retrieval Evaluator
+Retriever evaluator.
+This module will evaluate a retriever using a set of metrics.
+Parameters:
+| Name | Type | Description | Default |
+metrics
+List[Base Retrieval Metric]
+Sequence of metrics to evaluate |
+required |
+retriever
+Base Retriever
+Retriever to evaluate. |
+required |
+node_postprocessors
+List[Annotated[Base Node Postprocessor, Serialize As Any]] | None
+Post-processor to apply after retrieval. |
+Source code in llama-index-core/llama_index/core/evaluation/retrieval/evaluator.py
+16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 |
+MRR #
+Bases: Base Retrieval Metric
+MRR (Mean Reciprocal Rank) metric with two calculation options.
+- The default method calculates the reciprocal rank of the first relevant retrieved document.
+- The more granular method sums the reciprocal ranks of all relevant retrieved documents and divides by the count of relevant documents.
+Attributes:
+| Name | Type | Description |
+metric_name |
+The name of the metric. |
+Parameters:
+| Name | Type | Description | Default |
+use_granular_mrr
+False
+Source code in llama-index-core/llama_index/core/evaluation/retrieval/metrics.py
+83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 |
+compute #
+compute (query: Optional[str] = None,
+expected_ids: Optional[List[str]] = None,
+retrieved_ids: Optional[List[str]] = None,
+expected_texts: Optional[List[str]] = None,
+retrieved_texts: Optional[List[str]] = None,
+**kwargs: Any) -> Retrieval Metric Result
+Compute MRR based on the provided inputs and selected method.
+Parameters#
+query (Optional[str]): The query string (not used in the current implementation).
+expected_ids (Optional[List[str]]): Expected document IDs.
+retrieved_ids (Optional[List[str]]): Retrieved document IDs.
+expected_texts (Optional[List[str]]): Expected texts (not used in the current implementation).
+retrieved_texts (Optional[List[str]]): Retrieved texts (not used in the current implementation).
+Raises#
+Value Error: If the necessary IDs are not provided.
+Returns#
+Retrieval Metric Result: The result with the computed MRR score.
+Source code in llama-index-core/llama_index/core/evaluation/retrieval/metrics.py
+99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 |
+Hit Rate #
+Bases: Base Retrieval Metric
+Hit rate metric: Compute hit rate with two calculation options.
+- The default method checks for a single match between any of the retrieved docs and expected docs.
+- The more granular method checks for all potential matches between retrieved docs and expected docs.
+Attributes:
+| Name | Type | Description |
+metric_name |
+The name of the metric. |
+Parameters:
+| Name | Type | Description | Default |
+use_granular_hit_rate
+False
+Source code in llama-index-core/llama_index/core/evaluation/retrieval/metrics.py
+16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 |
+compute #
+compute (query: Optional[str] = None,
+expected_ids: Optional[List[str]] = None,
+retrieved_ids: Optional[List[str]] = None,
+expected_texts: Optional[List[str]] = None,
+retrieved_texts: Optional[List[str]] = None,
+**kwargs: Any) -> Retrieval Metric Result
+Compute metric based on the provided inputs.
+Parameters#
+query (Optional[str]): The query string (not used in the current implementation).
+expected_ids (Optional[List[str]]): Expected document IDs.
+retrieved_ids (Optional[List[str]]): Retrieved document IDs.
+expected_texts (Optional[List[str]]): Expected texts (not used in the current implementation).
+retrieved_texts (Optional[List[str]]): Retrieved texts (not used in the current implementation).
+Raises#
+Value Error: If the necessary IDs are not provided.
+Returns#
+Retrieval Metric Result: The result with the computed hit rate score.
+Source code in llama-index-core/llama_index/core/evaluation/retrieval/metrics.py
+32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 |
+Retrieval Metric Result #
+Bases: Base Model
+Metric result.
+Attributes:
+| Name | Type | Description |
+Parameters:
+| Name | Type | Description | Default |
+score
+float
+Score for the metric |
+required |
+metadata
+Dict[str, Any]
+Metadata for the metric result |
+<class 'dict'>
+Source code in llama-index-core/llama_index/core/evaluation/retrieval/metrics_base.py
+7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 |
+Semantic Similarity Evaluator #
+Bases: Base Evaluator
+Embedding similarity evaluator.
+Evaluate the quality of a question answering system by comparing the similarity between embeddings of the generated answer and the reference answer.
+Inspired by this paper: - Semantic Answer Similarity for Evaluating Question Answering Models https://arxiv.org/pdf/2108.06130.pdf
+Parameters:
+| Name | Type | Description | Default |
+similarity_threshold
+float
+Embedding similarity threshold for "passing". Defaults to 0.8. |
+Source code in llama-index-core/llama_index/core/evaluation/semantic_similarity.py
+13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 |
+Embedding QAFinetune Dataset #
+Bases: Base Model
+Embedding QA Finetuning Dataset.
+Parameters:
+| Name | Type | Description | Default |
+queries
+Dict[str, str]
+Dict id -> query. |
+required |
+corpus
+Dict[str, str]
+Dict id -> string. |
+required |
+relevant_docs
+Dict[str, List[str]]
+Dict query id -> list of doc ids. |
+required |
+'text'
+Source code in llama-index-core/llama_index/core/llama_dataset/legacy/embedding.py
+16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 |
+query_docid_pairs
+property
+query_docid_pairs: List[Tuple[str, List[str]]]
+Get query, relevant doc ids.
+save_json #
+save_json (path: str) -> None
+Save json.
+Source code in llama-index-core/llama_index/core/llama_dataset/legacy/embedding.py
+from_json
+classmethod
+from_json (path: str) -> Embedding QAFinetune Dataset
+Load json.
+Source code in llama-index-core/llama_index/core/llama_dataset/legacy/embedding.py
+get_retrieval_results_df #
+get_retrieval_results_df (names: List[str],
+results_arr: List[List[Retrieval Eval Result]],
+metric_keys: Optional[List[str]] = None,) -> Any
+Display retrieval results.
+Source code in llama-index-core/llama_index/core/evaluation/notebook_utils.py
+12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 |
+resolve_metrics #
+resolve_metrics (metrics: List[str],) -> List[Type[Base Retrieval Metric]]
+Resolve metrics from list of metric names.
+Source code in llama-index-core/llama_index/core/evaluation/retrieval/metrics.py
+generate_qa_embedding_pairs #
+generate_qa_embedding_pairs (nodes: List[Text Node],
+llm: Optional[LLM] = None,
+qa_generate_prompt_tmpl: str = DEFAULT_QA_GENERATE_PROMPT_TMPL,
+num_questions_per_chunk: int = 2,) -> Embedding QAFinetune Dataset
+Generate examples given a set of nodes.
+Source code in llama-index-core/llama_index/core/llama_dataset/legacy/embedding.py
+72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 |
+options: members: - Base Retrieval Evaluator - Retriever Evaluator - Retrieval Eval Result

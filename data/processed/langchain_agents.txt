@@ -1,0 +1,108 @@
+create_agent
+provides a production-ready agent implementation.
+An LLM Agent runs tools in a loop to achieve a goal.
+An agent runs until a stop condition is met - i.e., when the model emits a final output or an iteration limit is reached.
+create_agent
+builds a graph-based agent runtime using Lang Graph. A graph consists of nodes (steps) and edges (connections) that define how your agent processes information. The agent moves through this graph, executing nodes like the model node (which calls the model), the tools node (which executes tools), or middleware. Learn more about the Graph API.Core components
+Model
+The model is the reasoning engine of your agent. It can be specified in multiple ways, supporting both static and dynamic model selection. Static model
+Static models are configured once when creating the agent and remain unchanged throughout execution. This is the most common and straightforward approach. To initialize a static model from a: Chat Open AI. See Chat models for other available chat model classes.
+temperature, max_tokens, timeouts, base_url, and other provider-specific settings. Refer to the reference to see available params and methods on your model.
+Dynamic model
+Dynamic models are selected at based on the current and context. This enables sophisticated routing logic and cost optimization. To use a dynamic model, create middleware using the @wrap_model_call
+decorator that modifies the model in the request:
+Tools
+Tools give agents the ability to take actions. Agents go beyond simple model-only tool binding by facilitating:- Multiple tool calls in sequence (triggered by a single prompt)
+- Parallel tool calls when appropriate
+- Dynamic tool selection based on previous results
+- Tool retry logic and error handling
+- State persistence across tool calls
+Static tools
+Static tools are defined when creating the agent and remain unchanged throughout execution. This is the most common and straightforward approach. To define an agent with static tools, pass a list of the tools to the agent. Dynamic tools
+With dynamic tools, the set of tools available to the agent is modified at runtime rather than defined all upfront. Not every tool is appropriate for every situation. Too many tools may overwhelm the model (overload context) and increase errors; too few limit capabilities. Dynamic tool selection enables adapting the available toolset based on authentication state, user permissions, feature flags, or conversation stage. There are two approaches depending on whether tools are known ahead of time:- Filtering pre-registered tools
+- Runtime tool registration
+When all possible tools are known at agent creation time, you can pre-register them and dynamically filter which ones are exposed to the model based on state, permissions, or context. This approach is best when:
+- State
+- Store
+- Runtime Context
+Enable advanced tools only after certain conversation milestones:
+- All possible tools are known at compile/startup time
+- You want to filter based on permissions, feature flags, or conversation state
+- Tools are static but their availability is dynamic
+Tool error handling
+To customize how tool errors are handled, use the @wrap_tool_call
+decorator to create middleware:
+Tool Message
+with the custom error message when a tool fails:
+Tool use in the Re Act loop
+Agents follow the Re Act ("Reasoning + Acting") pattern, alternating between brief reasoning steps with targeted tool calls and feeding the resulting observations into subsequent decisions until they can deliver a final answer. Example of Re Act loop
+Example of Re Act loop
+Prompt: Identify the current most popular wireless headphones and verify availability.
+- Reasoning: "Popularity is time-sensitive, I need to use the provided search tool."
+- Acting: Call
+search_products ("wireless headphones")
+- Reasoning: "I need to confirm availability for the top-ranked item before answering."
+- Acting: Call
+check_inventory ("WH-1000 XM5")
+- Reasoning: "I have the most popular model and its stock status. I can now answer the user's question."
+- Acting: Produce final answer
+System prompt
+You can shape how your agent approaches tasks by providing a prompt. Thesystem_prompt
+parameter can be provided as a string:
+system_prompt
+is provided, the agent will infer its task from the messages directly.
+The system_prompt
+parameter accepts either a str
+or a System Message. Using a System Message
+gives you more control over the prompt structure, which is useful for provider-specific features like Anthropic's prompt caching:
+cache_control
+field with {"type": "ephemeral"}
+tells Anthropic to cache that content block, reducing latency and costs for repeated requests that use the same system prompt.
+Dynamic system prompt
+For more advanced use cases where you need to modify the system prompt based on runtime context or agent state, you can use middleware. The @dynamic_prompt
+decorator creates middleware that generates system prompts based on the model request:
+Set an optionalname
+for the agent. This is used as the node identifier when adding the agent as a subgraph in multi-agent systems:
+Invocation
+You can invoke an agent by passing an update to its State. All agents include a sequence of messages in their state; to invoke the agent, pass a new message:
+stream
+and invoke
+Advanced concepts
+Structured output
+In some situations, you may want the agent to return an output in a specific format. Lang Chain provides strategies for structured output via theresponse_format
+parameter.
+Tool Strategy
+uses artificial tool calling to generate structured output. This works with any model that supports tool calling. Tool Strategy
+should be used when provider-native structured output (via Provider Strategy) is not available or reliable.
+Provider Strategy
+uses the model provider's native structured output generation. This is more reliable but only works with providers that support native structured output:
+As of
+langchain 1.0, simply passing a schema (e.g., response_format=Contact Info) will default to Provider Strategy
+if the model supports native structured output. It will fall back to Tool Strategy
+otherwise. Memory
+Agents maintain conversation history automatically through the message state. You can also configure the agent to use a custom state schema to remember additional information during the conversation. Information stored in the state can be thought of as the short-term memory of the agent: Custom state schemas must extend Agent State
+as a Typed Dict
+There are two ways to define custom state:
+- Via middleware (preferred)
+- Via
+state_schema
+oncreate_agent
+Defining state via middleware
+Use middleware to define custom state when your custom state needs to be accessed by specific middleware hooks and tools attached to said middleware. Defining state via state_schema
+Use the state_schema
+parameter as a shortcut to define custom state that is only used in tools.
+As of
+langchain 1.0, custom state schemas must be Typed Dict
+types. Pydantic models and dataclasses are no longer supported. See the v1 migration guide for more details. Defining custom state via middleware is preferred over defining it via
+state_schema
+on create_agent
+because it allows you to keep state extensions conceptually scoped to the relevant middleware and tools.state_schema
+is still supported for backwards compatibility on create_agent.Streaming
+We've seen how the agent can be called withinvoke
+to get a final response. If the agent executes multiple steps, this may take a while. To show intermediate progress, we can stream back messages as they occur.
+Middleware
+Middleware provides powerful extensibility for customizing agent behavior at different stages of execution. You can use middleware to:- Process state before the model is called (e.g., message trimming, context injection)
+- Modify or validate the model's response (e.g., guardrails, content filtering)
+- Handle tool execution errors with custom logic
+- Implement dynamic model selection based on state or context
+- Add custom logging, monitoring, or analytics

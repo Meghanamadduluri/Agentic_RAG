@@ -1,0 +1,922 @@
+[
+  {
+    "chunk_id": "langchain_agents_chunk_1",
+    "framework": "LangChain",
+    "topic": "agents",
+    "title": "LangChain Agents",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/agents",
+    "text": "create_agent\nprovides a production-ready agent implementation.\nAn LLM Agent runs tools in a loop to achieve a goal.\nAn agent runs until a stop condition is met - i.e., when the model emits a final output or an iteration limit is reached.\ncreate_agent\nbuilds a graph-based agent runtime using Lang Graph. A graph consists of nodes (steps) and edges (connections) that define how your agent processes information. The agent moves through this graph, executing nodes like the model node (which calls the model), the tools node (which executes tools), or middleware. Learn more about the Graph API.Core components\nModel\nThe model is the reasoning engine of your agent. It can be specified in multiple ways, supporting both static and dynamic model selection. Static model"
+  },
+  {
+    "chunk_id": "langchain_agents_chunk_2",
+    "framework": "LangChain",
+    "topic": "agents",
+    "title": "LangChain Agents",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/agents",
+    "text": "Static models are configured once when creating the agent and remain unchanged throughout execution. This is the most common and straightforward approach. To initialize a static model from a: Chat Open AI. See Chat models for other available chat model classes.\ntemperature, max_tokens, timeouts, base_url, and other provider-specific settings. Refer to the reference to see available params and methods on your model.\nDynamic model\nDynamic models are selected at based on the current and context. This enables sophisticated routing logic and cost optimization. To use a dynamic model, create middleware using the @wrap_model_call\ndecorator that modifies the model in the request:\nTools\nTools give agents the ability to take actions. Agents go beyond simple model-only tool binding by facilitating:- Multiple tool calls in sequence (triggered by a single prompt)"
+  },
+  {
+    "chunk_id": "langchain_agents_chunk_3",
+    "framework": "LangChain",
+    "topic": "agents",
+    "title": "LangChain Agents",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/agents",
+    "text": "- Parallel tool calls when appropriate\n- Dynamic tool selection based on previous results\n- Tool retry logic and error handling\n- State persistence across tool calls\nStatic tools\nStatic tools are defined when creating the agent and remain unchanged throughout execution. This is the most common and straightforward approach. To define an agent with static tools, pass a list of the tools to the agent. Dynamic tools"
+  },
+  {
+    "chunk_id": "langchain_agents_chunk_4",
+    "framework": "LangChain",
+    "topic": "agents",
+    "title": "LangChain Agents",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/agents",
+    "text": "With dynamic tools, the set of tools available to the agent is modified at runtime rather than defined all upfront. Not every tool is appropriate for every situation. Too many tools may overwhelm the model (overload context) and increase errors; too few limit capabilities. Dynamic tool selection enables adapting the available toolset based on authentication state, user permissions, feature flags, or conversation stage. There are two approaches depending on whether tools are known ahead of time:- Filtering pre-registered tools\n- Runtime tool registration\nWhen all possible tools are known at agent creation time, you can pre-register them and dynamically filter which ones are exposed to the model based on state, permissions, or context. This approach is best when:\n- State\n- Store\n- Runtime Context\nEnable advanced tools only after certain conversation milestones:"
+  },
+  {
+    "chunk_id": "langchain_agents_chunk_5",
+    "framework": "LangChain",
+    "topic": "agents",
+    "title": "LangChain Agents",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/agents",
+    "text": "- State\n- Store\n- Runtime Context\nEnable advanced tools only after certain conversation milestones:\n- All possible tools are known at compile/startup time\n- You want to filter based on permissions, feature flags, or conversation state\n- Tools are static but their availability is dynamic\nTool error handling\nTo customize how tool errors are handled, use the @wrap_tool_call\ndecorator to create middleware:\nTool Message\nwith the custom error message when a tool fails:\nTool use in the Re Act loop\nAgents follow the Re Act (\"Reasoning + Acting\") pattern, alternating between brief reasoning steps with targeted tool calls and feeding the resulting observations into subsequent decisions until they can deliver a final answer. Example of Re Act loop\nExample of Re Act loop\nPrompt: Identify the current most popular wireless headphones and verify availability."
+  },
+  {
+    "chunk_id": "langchain_agents_chunk_6",
+    "framework": "LangChain",
+    "topic": "agents",
+    "title": "LangChain Agents",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/agents",
+    "text": "Prompt: Identify the current most popular wireless headphones and verify availability.\n- Reasoning: \"Popularity is time-sensitive, I need to use the provided search tool.\"\n- Acting: Call\nsearch_products (\"wireless headphones\")\n- Reasoning: \"I need to confirm availability for the top-ranked item before answering.\"\n- Acting: Call\ncheck_inventory (\"WH-1000 XM5\")\n- Reasoning: \"I have the most popular model and its stock status. I can now answer the user's question.\"\n- Acting: Produce final answer\nSystem prompt\nYou can shape how your agent approaches tasks by providing a prompt. Thesystem_prompt\nparameter can be provided as a string:\nsystem_prompt\nis provided, the agent will infer its task from the messages directly.\nThe system_prompt\nparameter accepts either a str\nor a System Message. Using a System Message"
+  },
+  {
+    "chunk_id": "langchain_agents_chunk_7",
+    "framework": "LangChain",
+    "topic": "agents",
+    "title": "LangChain Agents",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/agents",
+    "text": "The system_prompt\nparameter accepts either a str\nor a System Message. Using a System Message\ngives you more control over the prompt structure, which is useful for provider-specific features like Anthropic's prompt caching:\ncache_control\nfield with {\"type\": \"ephemeral\"}\ntells Anthropic to cache that content block, reducing latency and costs for repeated requests that use the same system prompt.\nDynamic system prompt\nFor more advanced use cases where you need to modify the system prompt based on runtime context or agent state, you can use middleware. The @dynamic_prompt\ndecorator creates middleware that generates system prompts based on the model request:\nSet an optionalname\nfor the agent. This is used as the node identifier when adding the agent as a subgraph in multi-agent systems:\nInvocation"
+  },
+  {
+    "chunk_id": "langchain_agents_chunk_8",
+    "framework": "LangChain",
+    "topic": "agents",
+    "title": "LangChain Agents",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/agents",
+    "text": "Invocation\nYou can invoke an agent by passing an update to its State. All agents include a sequence of messages in their state; to invoke the agent, pass a new message:\nstream\nand invoke\nAdvanced concepts\nStructured output\nIn some situations, you may want the agent to return an output in a specific format. Lang Chain provides strategies for structured output via theresponse_format\nparameter.\nTool Strategy\nuses artificial tool calling to generate structured output. This works with any model that supports tool calling. Tool Strategy\nshould be used when provider-native structured output (via Provider Strategy) is not available or reliable.\nProvider Strategy\nuses the model provider's native structured output generation. This is more reliable but only works with providers that support native structured output:\nAs of"
+  },
+  {
+    "chunk_id": "langchain_agents_chunk_9",
+    "framework": "LangChain",
+    "topic": "agents",
+    "title": "LangChain Agents",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/agents",
+    "text": "As of\nlangchain 1.0, simply passing a schema (e.g., response_format=Contact Info) will default to Provider Strategy\nif the model supports native structured output. It will fall back to Tool Strategy\notherwise. Memory\nAgents maintain conversation history automatically through the message state. You can also configure the agent to use a custom state schema to remember additional information during the conversation. Information stored in the state can be thought of as the short-term memory of the agent: Custom state schemas must extend Agent State\nas a Typed Dict\nThere are two ways to define custom state:\n- Via middleware (preferred)\n- Via\nstate_schema\noncreate_agent\nDefining state via middleware\nUse middleware to define custom state when your custom state needs to be accessed by specific middleware hooks and tools attached to said middleware. Defining state via state_schema"
+  },
+  {
+    "chunk_id": "langchain_agents_chunk_10",
+    "framework": "LangChain",
+    "topic": "agents",
+    "title": "LangChain Agents",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/agents",
+    "text": "Use the state_schema\nparameter as a shortcut to define custom state that is only used in tools.\nAs of\nlangchain 1.0, custom state schemas must be Typed Dict\ntypes. Pydantic models and dataclasses are no longer supported. See the v1 migration guide for more details. Defining custom state via middleware is preferred over defining it via\nstate_schema\non create_agent\nbecause it allows you to keep state extensions conceptually scoped to the relevant middleware and tools.state_schema\nis still supported for backwards compatibility on create_agent.Streaming\nWe've seen how the agent can be called withinvoke\nto get a final response. If the agent executes multiple steps, this may take a while. To show intermediate progress, we can stream back messages as they occur.\nMiddleware"
+  },
+  {
+    "chunk_id": "langchain_agents_chunk_11",
+    "framework": "LangChain",
+    "topic": "agents",
+    "title": "LangChain Agents",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/agents",
+    "text": "Middleware\nMiddleware provides powerful extensibility for customizing agent behavior at different stages of execution. You can use middleware to:- Process state before the model is called (e.g., message trimming, context injection)\n- Modify or validate the model's response (e.g., guardrails, content filtering)\n- Handle tool execution errors with custom logic\n- Implement dynamic model selection based on state or context\n- Add custom logging, monitoring, or analytics"
+  },
+  {
+    "chunk_id": "langchain_indexing_chunk_1",
+    "framework": "LangChain",
+    "topic": "indexing",
+    "title": "LangChain Indexing",
+    "source_url": "https://reference.langchain.com/python/langchain-core/indexing",
+    "text": "Code to help indexing data into a vectorstore.\nThis package contains helper logic to help deal with indexing data into\na Vector Store\nwhile avoiding duplicated content and over-writing content\nif it's unchanged.\nImport an attribute from a module located in a package.\nThis utility function is used in custom __getattr__\nmethods within __init__.py\nfiles to dynamically import attributes.\nAsync index data from the loader into the vector store.\nIndexing functionality uses a manager to keep track of which documents are in the vector store.\nThis allows us to keep track of which documents were updated, and which documents were deleted, which documents should be skipped.\nFor the time being, documents are indexed using their hashes, and users are not able to specify the uid of the document.\nlangchain-core\n0.3.25 Added scoped_full\ncleanup mode.\nscoped_full"
+  },
+  {
+    "chunk_id": "langchain_indexing_chunk_2",
+    "framework": "LangChain",
+    "topic": "indexing",
+    "title": "LangChain Indexing",
+    "source_url": "https://reference.langchain.com/python/langchain-core/indexing",
+    "text": "langchain-core\n0.3.25 Added scoped_full\ncleanup mode.\nscoped_full\nmode is suitable if determining an appropriate batch size\nis challenging or if your data loader cannot return the entire dataset at\nonce. This mode keeps track of source IDs in memory, which should be fine\nfor most use cases. If your dataset is large (10 M+ docs), you will likely\nneed to parallelize the indexing process regardless. Index data from the loader into the vector store.\nIndexing functionality uses a manager to keep track of which documents are in the vector store.\nThis allows us to keep track of which documents were updated, and which documents were deleted, which documents should be skipped.\nFor the time being, documents are indexed using their hashes, and users are not able to specify the uid of the document.\nlangchain-core\n0.3.25 Added scoped_full\ncleanup mode.\nscoped_full"
+  },
+  {
+    "chunk_id": "langchain_indexing_chunk_3",
+    "framework": "LangChain",
+    "topic": "indexing",
+    "title": "LangChain Indexing",
+    "source_url": "https://reference.langchain.com/python/langchain-core/indexing",
+    "text": "langchain-core\n0.3.25 Added scoped_full\ncleanup mode.\nscoped_full\nmode is suitable if determining an appropriate batch size\nis challenging or if your data loader cannot return the entire dataset at\nonce. This mode keeps track of source IDs in memory, which should be fine\nfor most use cases. If your dataset is large (10 M+ docs), you will likely\nneed to parallelize the indexing process regardless. Return a detailed a breakdown of the result of the indexing operation.\nA generic response for delete operation.\nThe fields in this response are optional and whether the Vector Store\nreturns them or not is up to the implementation.\nA document retriever that supports indexing operations.\nThis indexing interface is designed to be a generic abstraction for storing and querying documents that has an ID and metadata associated with it."
+  },
+  {
+    "chunk_id": "langchain_indexing_chunk_4",
+    "framework": "LangChain",
+    "topic": "indexing",
+    "title": "LangChain Indexing",
+    "source_url": "https://reference.langchain.com/python/langchain-core/indexing",
+    "text": "The interface is designed to be agnostic to the underlying implementation of the indexing system.\nThe interface is designed to support the following operations:\nAn in-memory record manager for testing purposes.\nAbstract base class representing the interface for a record manager.\nThe record manager abstraction is used by the langchain indexing API.\nThe record manager keeps track of which documents have been\nwritten into a Vector Store\nand when they were written.\nThe indexing API computes hashes for each document and stores the hash together with the write time and the source id in the record manager.\nOn subsequent indexing runs, the indexing API can check the record manager to determine which documents have already been indexed and which have not.\nThis allows the indexing API to avoid re-indexing documents that have already been indexed, and to only index new documents."
+  },
+  {
+    "chunk_id": "langchain_indexing_chunk_5",
+    "framework": "LangChain",
+    "topic": "indexing",
+    "title": "LangChain Indexing",
+    "source_url": "https://reference.langchain.com/python/langchain-core/indexing",
+    "text": "The main benefit of this abstraction is that it works across many vectorstores.\nTo be supported, a Vector Store\nneeds to only support the ability to add and\ndelete documents by ID. Using the record manager, the indexing API will\nbe able to delete outdated documents and avoid redundant indexing of documents\nthat have already been indexed.\nThe main constraints of this abstraction are:\nVector Store\nfails. A generic response for upsert operations.\nThe upsert response will be used by abstractions that implement an upsert operation for content that can be upserted by ID.\nUpsert APIs that accept inputs with IDs and generate IDs internally will return a response that includes the IDs that succeeded and the IDs that failed.\nIf there are no failures, the failed list will be empty, and the order of the IDs in the succeeded list will match the order of the input documents."
+  },
+  {
+    "chunk_id": "langchain_indexing_chunk_6",
+    "framework": "LangChain",
+    "topic": "indexing",
+    "title": "LangChain Indexing",
+    "source_url": "https://reference.langchain.com/python/langchain-core/indexing",
+    "text": "If there are failures, the response becomes ill defined, and a user of the API cannot determine which generated ID corresponds to which input document.\nIt is recommended for users explicitly attach the IDs to the items being indexed to avoid this issue."
+  },
+  {
+    "chunk_id": "langchain_retrieval_chunk_1",
+    "framework": "LangChain",
+    "topic": "retrieval",
+    "title": "LangChain Retrieval",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/retrieval",
+    "text": "- Finite context—they can't ingest entire corpora at once.\n- Static knowledge—their training data is frozen at a point in time.\nBuilding a knowledge base\nA knowledge base is a repository of documents or structured data used during retrieval. If you need a custom knowledge base, you can use Lang Chain's document loaders and vector stores to build one from your own data. If you already have a knowledge base (e.g., a SQL database, CRM, or internal documentation system), you do not need to rebuild it. You can:\n- Connect it as a tool for an agent in Agentic RAG.\n- Query it and supply the retrieved content as context to the LLM (2-Step RAG).\nTutorial: Semantic search\nLearn how to create a searchable knowledge base from your own data using Lang Chain's document loaders, embeddings, and vector stores."
+  },
+  {
+    "chunk_id": "langchain_retrieval_chunk_2",
+    "framework": "LangChain",
+    "topic": "retrieval",
+    "title": "LangChain Retrieval",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/retrieval",
+    "text": "In this tutorial, you'll build a search engine over a PDF, enabling retrieval of passages relevant to a query. You'll also implement a minimal RAG workflow on top of this engine to see how external knowledge can be integrated into LLM reasoning.\nFrom retrieval to RAG\nRetrieval allows LLMs to access relevant context at runtime. But most real-world applications go one step further: they integrate retrieval with generation to produce grounded, context-aware answers. This is the core idea behind Retrieval-Augmented Generation (RAG). The retrieval pipeline becomes a foundation for a broader system that combines search with generation. Retrieval pipeline\nA typical retrieval workflow looks like this: Each component is modular: you can swap loaders, splitters, embeddings, or vector stores without rewriting the app's logic. Building blocks\nDocument loaders"
+  },
+  {
+    "chunk_id": "langchain_retrieval_chunk_3",
+    "framework": "LangChain",
+    "topic": "retrieval",
+    "title": "LangChain Retrieval",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/retrieval",
+    "text": "Document loaders\nIngest data from external sources (Google Drive, Slack, Notion, etc.), returning standardized\nDocument\nobjects. Text splitters\nBreak large docs into smaller chunks that will be retrievable individually and fit within a model's context window.\nEmbedding models\nAn embedding model turns text into a vector of numbers so that texts with similar meaning land close together in that vector space.\nVector stores\nSpecialized databases for storing and searching embeddings.\nRetrievers\nA retriever is an interface that returns documents given an unstructured query.\nRAG architectures\nRAG can be implemented in multiple ways, depending on your system's needs. We outline each type in the sections below.| Architecture | Description | Control | Flexibility | Latency | Example Use Case |"
+  },
+  {
+    "chunk_id": "langchain_retrieval_chunk_4",
+    "framework": "LangChain",
+    "topic": "retrieval",
+    "title": "LangChain Retrieval",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/retrieval",
+    "text": "| 2-Step RAG | Retrieval always happens before generation. Simple and predictable | ✅ High | ❌ Low | ⚡ Fast | FAQs, documentation bots |\n| Agentic RAG | An LLM-powered agent decides when and how to retrieve during reasoning | ❌ Low | ✅ High | ⏳ Variable | Research assistants with access to multiple tools |\n| Hybrid | Combines characteristics of both approaches with validation steps | ⚖️ Medium | ⚖️ Medium | ⏳ Variable | Domain-specific Q&A with quality validation |\nLatency: Latency is generally more predictable in 2-Step RAG, as the maximum number of LLM calls is known and capped. This predictability assumes that LLM inference time is the dominant factor. However, real-world latency may also be affected by the performance of retrieval steps—such as API response times, network delays, or database queries—which can vary based on the tools and infrastructure in use.\n2-step RAG"
+  },
+  {
+    "chunk_id": "langchain_retrieval_chunk_5",
+    "framework": "LangChain",
+    "topic": "retrieval",
+    "title": "LangChain Retrieval",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/retrieval",
+    "text": "2-step RAG\nIn 2-Step RAG, the retrieval step is always executed before the generation step. This architecture is straightforward and predictable, making it suitable for many applications where the retrieval of relevant documents is a clear prerequisite for generating an answer. Tutorial: Retrieval-Augmented Generation (RAG)\nSee how to build a Q&A chatbot that can answer questions grounded in your data using Retrieval-Augmented Generation.\nThis tutorial walks through two approaches:\n- A RAG agent that runs searches with a flexible tool—great for general-purpose use.\n- A 2-step RAG chain that requires just one LLM call per query—fast and efficient for simpler tasks.\nAgentic RAG"
+  },
+  {
+    "chunk_id": "langchain_retrieval_chunk_6",
+    "framework": "LangChain",
+    "topic": "retrieval",
+    "title": "LangChain Retrieval",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/retrieval",
+    "text": "Agentic RAG\nAgentic Retrieval-Augmented Generation (RAG) combines the strengths of Retrieval-Augmented Generation with agent-based reasoning. Instead of retrieving documents before answering, an agent (powered by an LLM) reasons step-by-step and decides when and how to retrieve information during the interaction. Tutorial: Retrieval-Augmented Generation (RAG)\nSee how to build a Q&A chatbot that can answer questions grounded in your data using Retrieval-Augmented Generation.\nThis tutorial walks through two approaches:\n- A RAG agent that runs searches with a flexible tool—great for general-purpose use.\n- A 2-step RAG chain that requires just one LLM call per query—fast and efficient for simpler tasks.\nHybrid RAG"
+  },
+  {
+    "chunk_id": "langchain_retrieval_chunk_7",
+    "framework": "LangChain",
+    "topic": "retrieval",
+    "title": "LangChain Retrieval",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/retrieval",
+    "text": "Hybrid RAG\nHybrid RAG combines characteristics of both 2-Step and Agentic RAG. It introduces intermediate steps such as query preprocessing, retrieval validation, and post-generation checks. These systems offer more flexibility than fixed pipelines while maintaining some control over execution. Typical components include:- Query enhancement: Modify the input question to improve retrieval quality. This can involve rewriting unclear queries, generating multiple variations, or expanding queries with additional context.\n- Retrieval validation: Evaluate whether retrieved documents are relevant and sufficient. If not, the system may refine the query and retrieve again.\n- Answer validation: Check the generated answer for accuracy, completeness, and alignment with source content. If needed, the system can regenerate or revise the answer.\n- Applications with ambiguous or underspecified queries"
+  },
+  {
+    "chunk_id": "langchain_retrieval_chunk_8",
+    "framework": "LangChain",
+    "topic": "retrieval",
+    "title": "LangChain Retrieval",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/retrieval",
+    "text": "- Applications with ambiguous or underspecified queries\n- Systems that require validation or quality control steps\n- Workflows involving multiple sources or iterative refinement\nTutorial: Agentic RAG with Self-Correction\nAn example of Hybrid RAG that combines agentic reasoning with retrieval and self-correction."
+  },
+  {
+    "chunk_id": "langchain_overview_chunk_1",
+    "framework": "LangChain",
+    "topic": "overview",
+    "title": "LangChain Overview",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/overview",
+    "text": "Create an agent\nCore benefits\nStandard model interface\nDifferent providers have unique APIs for interacting with models, including the format of responses. Lang Chain standardizes how you interact with models so that you can seamlessly swap providers and avoid lock-in.\nEasy to use, highly flexible agent\nLang Chain's agent abstraction is designed to be easy to get started with, letting you build a simple agent in under 10 lines of code. But it also provides enough flexibility to allow you to do all the context engineering your heart desires.\nBuilt on top of Lang Graph\nLang Chain's agents are built on top of Lang Graph. This allows us to take advantage of Lang Graph's durable execution, human-in-the-loop support, persistence, and more.\nDebug with Lang Smith"
+  },
+  {
+    "chunk_id": "langchain_overview_chunk_2",
+    "framework": "LangChain",
+    "topic": "overview",
+    "title": "LangChain Overview",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/overview",
+    "text": "Debug with Lang Smith\nGain deep visibility into complex agent behavior with visualization tools that trace execution paths, capture state transitions, and provide detailed runtime metrics."
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_1",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "Memory is a system that remembers information about previous interactions. For AI agents, memory is crucial because it lets them remember previous interactions, learn from feedback, and adapt to user preferences. As agents tackle more complex tasks with numerous user interactions, this capability becomes essential for both efficiency and user satisfaction. Short term memory lets your application remember previous interactions within a single thread or conversation.\nA thread organizes multiple interactions in a session, similar to the way email groups messages in a single conversation."
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_2",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "Conversation history is the most common form of short-term memory. Long conversations pose a challenge to today's LLMs; a full history may not fit inside an LLM's context window, resulting in an context loss or errors. Even if your model supports the full context length, most LLMs still perform poorly over long contexts. They get \"distracted\" by stale or off-topic content, all while suffering from slower response times and higher costs. Chat models accept context using messages, which include instructions (a system message) and inputs (human messages). In chat applications, messages alternate between human inputs and model responses, resulting in a list of messages that grows longer over time. Because context windows are limited, many applications can benefit from using techniques to remove or \"forget\" stale information."
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_3",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "Need to remember information across conversations? Use long-term memory to store and recall user-specific or application-level data across different threads and sessions.\nTo add short-term memory (thread-level persistence) to an agent, you need to specify a checkpointer when creating an agent.\nLang Chain's agent manages short-term memory as a part of your agent's state. By storing these in the graph's state, the agent can access the full context for a given conversation while maintaining separation between different threads. State is persisted to a database (or memory) using a checkpointer so the thread can be resumed at any time. Short-term memory updates when the agent is invoked or a step (like a tool call) is completed, and the state is read at the start of each step."
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_4",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "from langchain.agents import create_agentfrom langgraph.checkpoint.memory import In Memory Saver agent = create_agent (\"gpt-5\", tools=[get_user_info], checkpointer=In Memory Saver (),) agent.invoke ({\"messages\": [{\"role\": \"user\", \"content\": \"Hi! My name is Bob.\"}]}, {\"configurable\": {\"thread_id\": \"1\"}},)\nIn production, use a checkpointer backed by a database:\npip install langgraph-checkpoint-postgres\nfrom langchain.agents import create_agentfrom langgraph.checkpoint.postgres import Postgres Saver DB_URI = \"postgresql://postgres: postgres @localhost:5442/postgres?sslmode=disable\"with Postgres Saver.from_conn_string (DB_URI) as checkpointer: checkpointer.setup () # auto create tables in Postgre SQL agent = create_agent (\"gpt-5\", tools=[get_user_info], checkpointer=checkpointer,)"
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_5",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "For more checkpointer options including SQLite, Postgres, and Azure Cosmos DB, see the list of checkpointer libraries in the Persistence documentation.\nBy default, agents use Agent State to manage short term memory, specifically the conversation history via a messages key. You can extend Agent State to add additional fields. Custom state schemas are passed to create_agent using the state_schema parameter."
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_6",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "from langchain.agents import create_agent, Agent Statefrom langgraph.checkpoint.memory import In Memory Saverclass Custom Agent State (Agent State): user_id: str preferences: dictagent = create_agent (\"gpt-5\", tools=[get_user_info], state_schema=Custom Agent State, checkpointer=In Memory Saver (),)# Custom state can be passed in invokeresult = agent.invoke ({ \"messages\": [{\"role\": \"user\", \"content\": \"Hello\"}], \"user_id\": \"user_123\", \"preferences\": {\"theme\": \"dark\"} }, {\"configurable\": {\"thread_id\": \"1\"}})"
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_7",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "Most LLMs have a maximum supported context window (denominated in tokens).One way to decide when to truncate messages is to count the tokens in the message history and truncate whenever it approaches that limit. If you're using Lang Chain, you can use the trim messages utility and specify the number of tokens to keep from the list, as well as the strategy (e.g., keep the last max_tokens) to use for handling the boundary. To trim message history in an agent, use the @before_model middleware decorator:"
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_8",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "from langchain.messages import Remove Messagefrom langgraph.graph.message import REMOVE_ALL_MESSAGESfrom langgraph.checkpoint.memory import In Memory Saverfrom langchain.agents import create_agent, Agent Statefrom langchain.agents.middleware import before_modelfrom langgraph.runtime import Runtimefrom langchain_core.runnables import Runnable Configfrom typing import Any @before_modeldef trim_messages (state: Agent State, runtime: Runtime) -> dict[str, Any] | None: \"\"\"Keep only the last few messages to fit context window.\"\"\" messages = state[\"messages\"] if len (messages) <= 3: return None # No changes needed first_msg = messages[0] recent_messages = messages[-3:] if len (messages) % 2 == 0 else messages[-4:] new_messages = [first_msg] + recent_messages return { \"messages\": [ Remove Message (id=REMOVE_ALL_MESSAGES), *new_messages ] }agent = create_agent (your_model_here,"
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_9",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "[ Remove Message (id=REMOVE_ALL_MESSAGES), *new_messages ] }agent = create_agent (your_model_here, tools=your_tools_here, middleware=[trim_messages], checkpointer=In Memory Saver (),) config: Runnable Config = {\"configurable\": {\"thread_id\": \"1\"}}agent.invoke ({\"messages\": \"hi, my name is bob\"}, config) agent.invoke ({\"messages\": \"write a short poem about cats\"}, config) agent.invoke ({\"messages\": \"now do the same but for dogs\"}, config) final_response = agent.invoke ({\"messages\": \"what's my name?\"}, config) final_response[\"messages\"][-1].pretty_print ()\"\"\"================================== Ai Message ==================================Your name is Bob"
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_10",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "You can delete messages from the graph state to manage the message history. This is useful when you want to remove specific messages or clear the entire message history. To delete messages from the graph state, you can use the Remove Message. For Remove Message to work, you need to use a state key with add_messagesreducer. The default Agent State provides this. To remove specific messages:\nfrom langchain.messages import Remove Message def delete_messages (state): messages = state[\"messages\"] if len (messages) > 2: # remove the earliest two messages return {\"messages\": [Remove Message (id=m.id) for m in messages[:2]]}\nTo remove all messages:\nfrom langgraph.graph.message import REMOVE_ALL_MESSAGES def delete_messages (state): return {\"messages\": [Remove Message (id=REMOVE_ALL_MESSAGES)]}"
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_11",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "When deleting messages, make sure that the resulting message history is valid. Check the limitations of the LLM provider you're using. For example:\nSome providers expect message history to start with a user message\nMost providers require assistant messages with tool calls to be followed by corresponding tool result messages."
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_12",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "from langchain.messages import Remove Messagefrom langchain.agents import create_agent, Agent Statefrom langchain.agents.middleware import after_modelfrom langgraph.checkpoint.memory import In Memory Saverfrom langgraph.runtime import Runtimefrom langchain_core.runnables import Runnable Config @after_modeldef delete_old_messages (state: Agent State, runtime: Runtime) -> dict | None: \"\"\"Remove old messages to keep conversation manageable.\"\"\" messages = state[\"messages\"] if len (messages) > 2: # remove the earliest two messages return {\"messages\": [Remove Message (id=m.id) for m in messages[:2]]} return Noneagent = create_agent (\"gpt-5-nano\", tools=[], system_prompt=\"Please be concise and to the point.\", middleware=[delete_old_messages], checkpointer=In Memory Saver (),) config: Runnable Config = {\"configurable\": {\"thread_id\": \"1\"}}for event in agent.stream ({\"messages\": [{\"role\": \"user\","
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_13",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "= {\"configurable\": {\"thread_id\": \"1\"}}for event in agent.stream ({\"messages\": [{\"role\": \"user\", \"content\": \"hi! I'm bob\"}]}, config, stream_mode=\"values\",): print ([(message.type, message.content) for message in event[\"messages\"]]) for event in agent.stream ({\"messages\": [{\"role\": \"user\", \"content\": \"what's my name?\"}]}, config, stream_mode=\"values\",): print ([(message.type, message.content) for message in event[\"messages\"]])"
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_14",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "[('human', \"hi! I'm bob\")][('human', \"hi! I'm bob\"), ('ai', 'Hi Bob! Nice to meet you. How can I help you today? I can answer questions, brainstorm ideas, draft text, explain things, or help with code.')][('human', \"hi! I'm bob\"), ('ai', 'Hi Bob! Nice to meet you. How can I help you today? I can answer questions, brainstorm ideas, draft text, explain things, or help with code.'), ('human', \"what's my name?\")][('human', \"hi! I'm bob\"), ('ai', 'Hi Bob! Nice to meet you. How can I help you today? I can answer questions, brainstorm ideas, draft text, explain things, or help with code.'), ('human', \"what's my name?\"), ('ai', 'Your name is Bob. How can I help you today, Bob?')][('human', \"what's my name?\"), ('ai', 'Your name is Bob. How can I help you today, Bob?')]"
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_15",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "The problem with trimming or removing messages, as shown above, is that you may lose information from culling of the message queue.\nBecause of this, some applications benefit from a more sophisticated approach of summarizing the message history using a chat model. To summarize message history in an agent, use the built-in Summarization Middleware:"
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_16",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "from langchain.agents import create_agentfrom langchain.agents.middleware import Summarization Middlewarefrom langgraph.checkpoint.memory import In Memory Saverfrom langchain_core.runnables import Runnable Configcheckpointer = In Memory Saver () agent = create_agent (model=\"gpt-4.1\", tools=[], middleware=[ Summarization Middleware (model=\"gpt-4.1-mini\", trigger=(\"tokens\", 4000), keep=(\"messages\", 20)) ], checkpointer=checkpointer,) config: Runnable Config = {\"configurable\": {\"thread_id\": \"1\"}}agent.invoke ({\"messages\": \"hi, my name is bob\"}, config) agent.invoke ({\"messages\": \"write a short poem about cats\"}, config) agent.invoke ({\"messages\": \"now do the same but for dogs\"}, config) final_response = agent.invoke ({\"messages\": \"what's my name?\"}, config) final_response[\"messages\"][-1].pretty_print ()\"\"\"================================== Ai Message ==================================Your"
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_17",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "Access short term memory (state) in a tool using the runtime parameter (typed as Tool Runtime).The runtime parameter is hidden from the tool signature (so the model doesn't see it), but the tool can access the state through it.\nfrom langchain.agents import create_agent, Agent Statefrom langchain.tools import tool, Tool Runtimeclass Custom State (Agent State): user_id: str @tooldef get_user_info (runtime: Tool Runtime) -> str: \"\"\"Look up user info.\"\"\" user_id = runtime.state[\"user_id\"] return \"User is John Smith\" if user_id == \"user_123\" else \"Unknown user\"agent = create_agent (model=\"gpt-5-nano\", tools=[get_user_info], state_schema=Custom State,) result = agent.invoke ({ \"messages\": \"look up user information\", \"user_id\": \"user_123\"}) print (result[\"messages\"][-1].content)# > User is John Smith."
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_18",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "To modify the agent's short-term memory (state) during execution, you can return state updates directly from the tools. This is useful for persisting intermediate results or making information accessible to subsequent tools or prompts."
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_19",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "from langchain.tools import tool, Tool Runtimefrom langchain_core.runnables import Runnable Configfrom langchain.messages import Tool Messagefrom langchain.agents import create_agent, Agent Statefrom langgraph.types import Commandfrom pydantic import Base Modelclass Custom State (Agent State): user_name: strclass Custom Context (Base Model): user_id: str @tooldef update_user_info (runtime: Tool Runtime[Custom Context, Custom State],) -> Command: \"\"\"Look up and update user info.\"\"\" user_id = runtime.context.user_id name = \"John Smith\" if user_id == \"user_123\" else \"Unknown user\" return Command (update={ \"user_name\": name, # update the message history \"messages\": [ Tool Message (\"Successfully looked up user information\", tool_call_id=runtime.tool_call_id) ] })@tooldef greet (runtime: Tool Runtime[Custom Context, Custom State]) -> str | Command: \"\"\"Use this to greet the user once you found"
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_20",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "Context, Custom State]) -> str | Command: \"\"\"Use this to greet the user once you found their info.\"\"\" user_name = runtime.state.get (\"user_name\", None) if user_name is None: return Command (update={ \"messages\": [ Tool Message (\"Please call the 'update_user_info' tool it will get and update the user's name.\", tool_call_id=runtime.tool_call_id) ] }) return f\"Hello {user_name}!\"agent = create_agent (model=\"gpt-5-nano\", tools=[update_user_info, greet], state_schema=Custom State, context_schema=Custom Context,) agent.invoke ({\"messages\": [{\"role\": \"user\", \"content\": \"greet the user\"}]}, context=Custom Context (user_id=\"user_123\"),)"
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_21",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "from langchain.agents import create_agentfrom typing import Typed Dictfrom langchain.agents.middleware import dynamic_prompt, Model Requestclass Custom Context (Typed Dict): user_name: strdef get_weather (city: str) -> str: \"\"\"Get the weather in a city.\"\"\" return f\"The weather in {city} is always sunny!\"@dynamic_promptdef dynamic_system_prompt (request: Model Request) -> str: user_name = request.runtime.context[\"user_name\"] system_prompt = f\"You are a helpful assistant. Address the user as {user_name}.\" return system_promptagent = create_agent (model=\"gpt-5-nano\", tools=[get_weather], middleware=[dynamic_system_prompt], context_schema=Custom Context,) result = agent.invoke ({\"messages\": [{\"role\": \"user\", \"content\": \"What is the weather in SF?\"}]}, context=Custom Context (user_name=\"John Smith\"),) for msg in result[\"messages\"]: msg.pretty_print ()\nOutput"
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_22",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "Output\n================================ Human Message =================================What is the weather in SF?================================== Ai Message ==================================Tool Calls: get_weather (call_WFQl OGn4b2yo Jrv7cih342 FG) Call ID: call_WFQl OGn4b2yo Jrv7cih342 FG Args: city: San Francisco================================= Tool Message =================================Name: get_weather The weather in San Francisco is always sunny!================================== Ai Message ==================================Hi John Smith, the weather in San Francisco is always sunny!\nAccess short term memory (state) in @before_model middleware to process messages before model calls."
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_23",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "from langchain.messages import Remove Messagefrom langgraph.graph.message import REMOVE_ALL_MESSAGESfrom langgraph.checkpoint.memory import In Memory Saverfrom langchain.agents import create_agent, Agent Statefrom langchain.agents.middleware import before_modelfrom langchain_core.runnables import Runnable Configfrom langgraph.runtime import Runtimefrom typing import Any @before_modeldef trim_messages (state: Agent State, runtime: Runtime) -> dict[str, Any] | None: \"\"\"Keep only the last few messages to fit context window.\"\"\" messages = state[\"messages\"] if len (messages) <= 3: return None # No changes needed first_msg = messages[0] recent_messages = messages[-3:] if len (messages) % 2 == 0 else messages[-4:] new_messages = [first_msg] + recent_messages return { \"messages\": [ Remove Message (id=REMOVE_ALL_MESSAGES), *new_messages ] }agent = create_agent (\"gpt-5-nano\", tools=[],"
+  },
+  {
+    "chunk_id": "langchain_short-term-memory_chunk_24",
+    "framework": "LangChain",
+    "topic": "short_term_memory",
+    "title": "LangChain Short_Term_Memory",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    "text": "Message (id=REMOVE_ALL_MESSAGES), *new_messages ] }agent = create_agent (\"gpt-5-nano\", tools=[], middleware=[trim_messages], checkpointer=In Memory Saver ()) config: Runnable Config = {\"configurable\": {\"thread_id\": \"1\"}}agent.invoke ({\"messages\": \"hi, my name is bob\"}, config) agent.invoke ({\"messages\": \"write a short poem about cats\"}, config) agent.invoke ({\"messages\": \"now do the same but for dogs\"}, config) final_response = agent.invoke ({\"messages\": \"what's my name?\"}, config) final_response[\"messages\"][-1].pretty_print ()\"\"\"================================== Ai Message ==================================Your name is Bob"
+  },
+  {
+    "chunk_id": "langchain_streaming_chunk_1",
+    "framework": "LangChain",
+    "topic": "streaming",
+    "title": "LangChain Streaming",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/streaming",
+    "text": "Overview\nLang Chain's streaming system lets you surface live feedback from agent runs to your application. What's possible with Lang Chain streaming:- Stream agent progress—get state updates after each agent step.\n- Stream LLM tokens—stream language model tokens as they're generated.\n- Stream thinking / reasoning tokens—surface model reasoning as it's generated.\n- Stream custom updates—emit user-defined signals (e.g.,\n\"Fetched 10/100 records\"). - Stream multiple modes—choose from\nupdates\n(agent progress), messages\n(LLM tokens + metadata), orcustom\n(arbitrary user data).\nSupported stream modes\nPass one or more of the following stream modes as a list to thestream\nor astream\nmethods:\n| Mode | Description |\nupdates | Streams state updates after each agent step. If multiple updates are made in the same step (e.g., multiple nodes are run), those updates are streamed separately. |"
+  },
+  {
+    "chunk_id": "langchain_streaming_chunk_2",
+    "framework": "LangChain",
+    "topic": "streaming",
+    "title": "LangChain Streaming",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/streaming",
+    "text": "messages | Streams tuples of (token, metadata) from any graph nodes where an LLM is invoked. |\ncustom | Streams custom data from inside your graph nodes using the stream writer. |\nAgent progress\nTo stream agent progress, use thestream\nor astream\nmethods with stream_mode=\"updates\". This emits an event after every agent step.\nFor example, if you have an agent that calls a tool once, you should see the following updates:\n- LLM node:\nAIMessage\nwith tool call requests - Tool node:\nTool Message\nwith execution result - LLM node: Final AI response\nStreaming agent progress\nOutput\nLLM tokens\nTo stream tokens as they are produced by the LLM, usestream_mode=\"messages\". Below you can see the output of the agent streaming tool calls and the final response.\nStreaming LLM tokens\nOutput\nCustom updates\nTo stream updates from tools as they are executed, you can useget_stream_writer"
+  },
+  {
+    "chunk_id": "langchain_streaming_chunk_3",
+    "framework": "LangChain",
+    "topic": "streaming",
+    "title": "LangChain Streaming",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/streaming",
+    "text": "Custom updates\nTo stream updates from tools as they are executed, you can useget_stream_writer\nStreaming custom updates\nOutput\nIf you add\nget_stream_writer\ninside your tool, you won't be able to invoke the tool outside of a Lang Graph execution context. Stream multiple modes\nYou can specify multiple streaming modes by passing stream mode as a list: stream_mode=[\"updates\", \"custom\"]\nEach streamed chunk is a Stream Part\ndict with type, and data\nkeys. Use chunk[\"type\"]\nto determine the stream mode and chunk[\"data\"]\nto access the payload.\nStreaming multiple modes\nOutput\nCommon patterns\nBelow are examples showing common use cases for streaming. Streaming thinking / reasoning tokens\nSome models perform internal reasoning before producing a final answer. You can stream these thinking / reasoning tokens as they're generated by filtering standard content blocks for thetype\n\"reasoning\""
+  },
+  {
+    "chunk_id": "langchain_streaming_chunk_4",
+    "framework": "LangChain",
+    "topic": "streaming",
+    "title": "LangChain Streaming",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/streaming",
+    "text": "\"reasoning\"\nReasoning output must be enabled on the model. See the reasoning section and your provider's integration page for configuration details. To quickly check a model's reasoning support, see models.dev.\nstream_mode=\"messages\"\nand filter for reasoning content blocks:\nOutput\nthinking\nblocks, Open AI reasoning\nsummaries, etc.) into a standard \"reasoning\"\ncontent block type via the content_blocks\nproperty.\nTo stream reasoning tokens directly from a chat model (without an agent), see streaming with chat models.\nStreaming tool calls\nYou may want to stream both:- Partial JSON as tool calls are generated\n- The completed, parsed tool calls that are executed\nstream_mode=\"messages\"\nwill stream incremental message chunks generated by all LLM calls in the agent. To access the completed messages with parsed tool calls:\n- If those messages are tracked in the state (as in the model node of"
+  },
+  {
+    "chunk_id": "langchain_streaming_chunk_5",
+    "framework": "LangChain",
+    "topic": "streaming",
+    "title": "LangChain Streaming",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/streaming",
+    "text": "- If those messages are tracked in the state (as in the model node of\ncreate_agent), usestream_mode=[\"messages\", \"updates\"]\nto access completed messages through state updates (demonstrated below). - If those messages are not tracked in the state, use custom updates or aggregate the chunks during the streaming loop (next section).\nRefer to the section below on streaming from sub-agents if your agent includes multiple LLMs.\nOutput\nAccessing completed messages\nIf completed messages are tracked in an agent's state, you can use\nstream_mode=[\"messages\", \"updates\"]\nas demonstrated in the Streaming tool calls section to access completed messages during streaming. Output\nStreaming with human-in-the-loop\nTo handle human-in-the-loop interrupts, we build on the above example:- We configure the agent with human-in-the-loop middleware and a checkpointer\n- We collect interrupts generated during the"
+  },
+  {
+    "chunk_id": "langchain_streaming_chunk_6",
+    "framework": "LangChain",
+    "topic": "streaming",
+    "title": "LangChain Streaming",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/streaming",
+    "text": "- We collect interrupts generated during the\n\"updates\"\nstream mode - We respond to those interrupts with a command\nOutput\nStreaming from sub-agents\nWhen there are multiple LLMs at any point in an agent, it's often necessary to disambiguate the source of messages as they are generated. To do this, pass aname\nto each agent when creating it. This name is then available in metadata via the lc_agent_name\nkey when streaming in \"messages\"\nmode.\nBelow, we update the streaming tool calls example:\n- We replace our tool with a\ncall_weather_agent\ntool that invokes an agent internally - We add a\nto each agent - We specify\nsubgraphs=True\nwhen creating the stream - Our stream processing is identical to before, but we add logic to keep track of what agent is active using\ncreate_agent\n'sname\nparameter\nOutput\nDisable streaming"
+  },
+  {
+    "chunk_id": "langchain_streaming_chunk_7",
+    "framework": "LangChain",
+    "topic": "streaming",
+    "title": "LangChain Streaming",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/streaming",
+    "text": "create_agent\n'sname\nparameter\nOutput\nDisable streaming\nIn some applications you might need to disable streaming of individual tokens for a given model. This is useful when:- Working with multi-agent systems to control which agents stream their output\n- Mixing models that support streaming with those that do not\n- Deploying to Lang Smith and wanting to prevent certain model outputs from being streamed to the client\nstreaming=False\nwhen initializing the model.\nNot all chat model integrations support the\nstreaming\nparameter. If your model doesn't support it, use disable_streaming=True\ninstead. This parameter is available on all chat models via the base class.v2 streaming format\nRequires Lang Graph >= 1.1.\nversion=\"v2\"\nto stream ()\nor astream ()\nto get a unified output format. Every chunk is a Stream Part\ndict with type, and data"
+  },
+  {
+    "chunk_id": "langchain_streaming_chunk_8",
+    "framework": "LangChain",
+    "topic": "streaming",
+    "title": "LangChain Streaming",
+    "source_url": "https://docs.langchain.com/oss/python/langchain/streaming",
+    "text": "or astream ()\nto get a unified output format. Every chunk is a Stream Part\ndict with type, and data\nkeys — the same shape regardless of stream mode or number of modes:\ninvoke ()\n— it returns a Graph Output\nobject with.value\nand.interrupts\nattributes, cleanly separating state from interrupt metadata:\nRelated\n- Frontend streaming—Build React UIs with\nuse Stream\nfor real-time agent interactions - Streaming with chat models—Stream tokens directly from a chat model without using an agent or graph\n- Reasoning with chat models—Configure and access reasoning output from chat models\n- Standard content blocks—Understand the normalized content block format used for reasoning, text, and other content types\n- Streaming with human-in-the-loop—Stream agent progress while handling interrupts for human review\n- Lang Graph streaming—Advanced streaming options including\nvalues, debug"
+  },
+  {
+    "chunk_id": "llamaindex_agents_chunk_1",
+    "framework": "LlamaIndex",
+    "topic": "agents",
+    "title": "LlamaIndex Agents",
+    "source_url": "https://developers.llamaindex.ai/python/framework/use_cases/agents/",
+    "text": "Agents\nAn \"agent\" is an automated reasoning and decision engine. It takes in a user input/query and can make internal decisions for executing that query in order to return the correct result. The key agent components can include, but are not limited to:\n- Breaking down a complex question into smaller ones\n- Choosing an external Tool to use + coming up with parameters for calling the Tool\n- Planning out a set of tasks\n- Storing previously completed tasks in a memory module\nLlama Index provides a comprehensive framework for building agentic systems with varying degrees of complexity:\n- If you want to build agents quickly: Use our prebuilt agent and tool architectures to rapidly setup agentic systems.\n- If you want full control over your agentic system: Build and deploy custom agentic workflows from scratch using our Workflows.\nUse Cases"
+  },
+  {
+    "chunk_id": "llamaindex_agents_chunk_2",
+    "framework": "LlamaIndex",
+    "topic": "agents",
+    "title": "LlamaIndex Agents",
+    "source_url": "https://developers.llamaindex.ai/python/framework/use_cases/agents/",
+    "text": "Use Cases\nAgentic RAG: Build a context-augmented research assistant over your data that not only answers simple questions, but complex research tasks. Our getting started guide is a great place to start.\nReport Generation: Generate a multimodal report using a multi-agent researcher + writer workflow + Llama Parse. Notebook.\nCustomer Support: Check out starter template for building a multi-agent concierge with workflows.\nOthers:\nProductivity Assistant: Build an agent that can operate over common workflow tools like email, calendar. Check out our GSuite agent tutorial.\nCoding Assistant: Build an agent that can operate over code. Check out our code interpreter tutorial.\nResources\nThe following component guides are the central hubs for getting started in building with agents:\nCustom Agentic Workflows"
+  },
+  {
+    "chunk_id": "llamaindex_agents_chunk_3",
+    "framework": "LlamaIndex",
+    "topic": "agents",
+    "title": "LlamaIndex Agents",
+    "source_url": "https://developers.llamaindex.ai/python/framework/use_cases/agents/",
+    "text": "Custom Agentic Workflows\nLlama Index Workflows allow you to build very custom, agentic workflows through a core event-driven orchestration foundation.\nBuilding with Agentic Ingredients\nIf you want to leverage core agentic ingredients in your workflow, Llama Index has robust abstractions for every agent sub-ingredient.\n- Query Planning: Routing, Sub-Questions, Query Transformations.\n- Function Calling and Tool Use: Check out our Open AI, Mistral guides as examples.\nEcosystem"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_1",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "Retrieval\nEvaluation modules.\nAnswer Relevancy Evaluator #\nBases: Base Evaluator\nAnswer relevancy evaluator.\nEvaluates the relevancy of response to a query. This evaluator considers the query string and response string.\nParameters:\n| Name | Type | Description | Default |\nraise_error\nOptional[bool]\nWhether to raise an error if the response is invalid. Defaults to False. |\nFalse\neval_template\nOptional[Union[str, Base Prompt Template]]\nThe template to use for evaluation. |\nrefine_template\nOptional[Union[str, Base Prompt Template]]\nThe template to use for refinement. |\nrequired |\nSource code in llama-index-core/llama_index/core/evaluation/answer_relevancy.py"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_2",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "required |\nSource code in llama-index-core/llama_index/core/evaluation/answer_relevancy.py\n49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 |\naevaluate\nasync\naevaluate (query: str | None = None,\nresponse: str | None = None,\ncontexts: Sequence[str] | None = None,\nsleep_time_in_seconds: int = 0,\n**kwargs: Any) -> Evaluation Result\nEvaluate whether the response is relevant to the query.\nSource code in llama-index-core/llama_index/core/evaluation/answer_relevancy.py"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_3",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "Source code in llama-index-core/llama_index/core/evaluation/answer_relevancy.py\n104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 |\nBase Evaluator #\nBases: Prompt Mixin\nBase Evaluator class.\nSource code in llama-index-core/llama_index/core/evaluation/base.py\n46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 |\nevaluate #\nevaluate (query: Optional[str] = None,\nresponse: Optional[str] = None,\ncontexts: Optional[Sequence[str]] = None,\n**kwargs: Any) -> Evaluation Result"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_4",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "contexts: Optional[Sequence[str]] = None,\n**kwargs: Any) -> Evaluation Result\nRun evaluation with query string, retrieved contexts, and generated response string.\nSubclasses can override this method to provide custom evaluation logic and take in additional arguments.\nSource code in llama-index-core/llama_index/core/evaluation/base.py\n53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 |\naevaluate\nabstractmethod\nasync\naevaluate (query: Optional[str] = None,\nresponse: Optional[str] = None,\ncontexts: Optional[Sequence[str]] = None,\n**kwargs: Any) -> Evaluation Result\nRun evaluation with query string, retrieved contexts, and generated response string.\nSubclasses can override this method to provide custom evaluation logic and take in additional arguments.\nSource code in llama-index-core/llama_index/core/evaluation/base.py\n76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 |"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_5",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 |\nevaluate_response #\nevaluate_response (query: Optional[str] = None,\nresponse: Optional[Response] = None,\n**kwargs: Any) -> Evaluation Result\nRun evaluation with query string and generated Response object.\nSubclasses can override this method to provide custom evaluation logic and take in additional arguments.\nSource code in llama-index-core/llama_index/core/evaluation/base.py\n93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 |\naevaluate_response\nasync\naevaluate_response (query: Optional[str] = None,\nresponse: Optional[Response] = None,\n**kwargs: Any) -> Evaluation Result\nRun evaluation with query string and generated Response object.\nSubclasses can override this method to provide custom evaluation logic and take in additional arguments.\nSource code in llama-index-core/llama_index/core/evaluation/base.py"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_6",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "Source code in llama-index-core/llama_index/core/evaluation/base.py\n115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 |\nEvaluation Result #\nBases: Base Model\nEvaluation result.\nOutput of an Base Evaluator.\nParameters:\n| Name | Type | Description | Default |\nquery\nstr | None\nQuery string |\ncontexts\nSequence[str] | None\nContext strings |\nresponse\nstr | None\nResponse string |\npassing\nbool | None\nBinary evaluation result (passing or not) |\nfeedback\nstr | None\nFeedback or reasoning for the response |\nscore\nfloat | None\nScore for the response |\npairwise_source\nstr | None\nUsed only for pairwise and specifies whether it is from original order of presented answers or flipped order |\ninvalid_result\nWhether the evaluation result is an invalid one. |\nFalse\ninvalid_reason\nstr | None\nReason for invalid evaluation. |"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_7",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "False\ninvalid_reason\nstr | None\nReason for invalid evaluation. |\nSource code in llama-index-core/llama_index/core/evaluation/base.py\n12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 |\nBatch Eval Runner #\nBatch evaluation runner.\nParameters:\n| Name | Type | Description | Default |\nevaluators\nDict[str, Base Evaluator]\nDictionary of evaluators. |\nrequired |\nworkers\nNumber of workers to use for parallelization. Defaults to 2. |\nshow_progress\nWhether to show progress bars. Defaults to False. |\nFalse\nSource code in llama-index-core/llama_index/core/evaluation/batch_runner.py"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_8",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_9",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 349 350 351 352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 367 368 369 370 371 372 373 374 375 376 377 378 379 380 381 382 383 384 385 386 387 388 389 390 391 392 393 394 395 396 397 398 399 400 401 402 403 404 405 406 407 408 409 410 |"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_10",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "aevaluate_response_strs\nasync\naevaluate_response_strs (queries: Optional[List[str]] = None,\nresponse_strs: Optional[List[str]] = None,\ncontexts_list: Optional[List[List[str]]] = None,\n**eval_kwargs_lists: Dict[str, Any]) -> Dict[str, List[Evaluation Result]]\nEvaluate query, response pairs.\nThis evaluates queries, responses, contexts as string inputs. Can supply additional kwargs to the evaluator in eval_kwargs_lists.\nParameters:\n| Name | Type | Description | Default |\nqueries\nOptional[List[str]]\nList of query strings. Defaults to None. |\nresponse_strs\nOptional[List[str]]\nList of response strings. Defaults to None. |\ncontexts_list\nOptional[List[List[str]]]\nList of context lists. Defaults to None. |\n**eval_kwargs_lists\nDict[str, Any]"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_11",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "List of context lists. Defaults to None. |\n**eval_kwargs_lists\nDict[str, Any]\nDict of either dicts or lists of kwargs to pass to evaluator. Defaults to None. multiple evaluators: {evaluator: {kwarg: [list of values]},...} single evaluator: {kwarg: [list of values]} |\nSource code in llama-index-core/llama_index/core/evaluation/batch_runner.py\n195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 |\naevaluate_responses\nasync\naevaluate_responses (queries: Optional[List[str]] = None,\nresponses: Optional[List[Response]] = None,\n**eval_kwargs_lists: Dict[str, Any]) -> Dict[str, List[Evaluation Result]]\nEvaluate query, response pairs.\nThis evaluates queries and response objects.\nParameters:"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_12",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "Evaluate query, response pairs.\nThis evaluates queries and response objects.\nParameters:\n| Name | Type | Description | Default |\nqueries\nOptional[List[str]]\nList of query strings. Defaults to None. |\nresponses\nOptional[List[Response]]\nList of response objects. Defaults to None. |\n**eval_kwargs_lists\nDict[str, Any]\nDict of either dicts or lists of kwargs to pass to evaluator. Defaults to None. multiple evaluators: {evaluator: {kwarg: [list of values]},...} single evaluator: {kwarg: [list of values]} |\nSource code in llama-index-core/llama_index/core/evaluation/batch_runner.py\n261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 |\naevaluate_queries\nasync\naevaluate_queries (query_engine: Base Query Engine,"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_13",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "aevaluate_queries\nasync\naevaluate_queries (query_engine: Base Query Engine,\nqueries: Optional[List[str]] = None,\n**eval_kwargs_lists: Dict[str, Any]) -> Dict[str, List[Evaluation Result]]\nEvaluate queries.\nParameters:\n| Name | Type | Description | Default |\nquery_engine\nBase Query Engine\nQuery engine. |\nrequired |\nqueries\nOptional[List[str]]\nList of query strings. Defaults to None. |\n**eval_kwargs_lists\nDict[str, Any]\nDict of lists of kwargs to pass to evaluator. Defaults to None. |\nSource code in llama-index-core/llama_index/core/evaluation/batch_runner.py\n319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 |\nevaluate_response_strs #\nevaluate_response_strs (queries: Optional[List[str]] = None,\nresponse_strs: Optional[List[str]] = None,\ncontexts_list: Optional[List[List[str]]] = None,"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_14",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "response_strs: Optional[List[str]] = None,\ncontexts_list: Optional[List[List[str]]] = None,\n**eval_kwargs_lists: Dict[str, Any]) -> Dict[str, List[Evaluation Result]]\nEvaluate query, response pairs.\nSync version of aevaluate_response_strs.\nSource code in llama-index-core/llama_index/core/evaluation/batch_runner.py\n350 351 352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 367 368 369 370 |\nevaluate_responses #\nevaluate_responses (queries: Optional[List[str]] = None,\nresponses: Optional[List[Response]] = None,\n**eval_kwargs_lists: Dict[str, Any]) -> Dict[str, List[Evaluation Result]]\nEvaluate query, response objs.\nSync version of aevaluate_responses.\nSource code in llama-index-core/llama_index/core/evaluation/batch_runner.py\n372 373 374 375 376 377 378 379 380 381 382 383 384 385 386 387 388 389 390 |\nevaluate_queries #\nevaluate_queries (query_engine: Base Query Engine,"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_15",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "evaluate_queries #\nevaluate_queries (query_engine: Base Query Engine,\nqueries: Optional[List[str]] = None,\n**eval_kwargs_lists: Dict[str, Any]) -> Dict[str, List[Evaluation Result]]\nEvaluate queries.\nSync version of aevaluate_queries.\nSource code in llama-index-core/llama_index/core/evaluation/batch_runner.py\n392 393 394 395 396 397 398 399 400 401 402 403 404 405 406 407 408 409 410 |\nContext Relevancy Evaluator #\nBases: Base Evaluator\nContext relevancy evaluator.\nEvaluates the relevancy of retrieved contexts to a query. This evaluator considers the query string and retrieved contexts.\nParameters:\n| Name | Type | Description | Default |\nraise_error\nOptional[bool]\nWhether to raise an error if the response is invalid. Defaults to False. |\nFalse\neval_template\nOptional[Union[str, Base Prompt Template]]\nThe template to use for evaluation. |\nrefine_template"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_16",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "Optional[Union[str, Base Prompt Template]]\nThe template to use for evaluation. |\nrefine_template\nOptional[Union[str, Base Prompt Template]]\nThe template to use for refinement. |\nSource code in llama-index-core/llama_index/core/evaluation/context_relevancy.py\n66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 |\naevaluate\nasync\naevaluate (query: str | None = None,\nresponse: str | None = None,\ncontexts: Sequence[str] | None = None,\nsleep_time_in_seconds: int = 0,\n**kwargs: Any) -> Evaluation Result"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_17",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "sleep_time_in_seconds: int = 0,\n**kwargs: Any) -> Evaluation Result\nEvaluate whether the contexts is relevant to the query.\nSource code in llama-index-core/llama_index/core/evaluation/context_relevancy.py\n130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 |\nCorrectness Evaluator #\nBases: Base Evaluator\nCorrectness evaluator.\nEvaluates the correctness of a question answering system.\nThis evaluator depends on reference\nanswer to be provided, in addition to the\nquery string and response string.\nIt outputs a score between 1 and 5, where 1 is the worst and 5 is the best, along with a reasoning for the score. Passing is defined as a score greater than or equal to the given threshold.\nParameters:\n| Name | Type | Description | Default |\neval_template"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_18",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "Parameters:\n| Name | Type | Description | Default |\neval_template\nOptional[Union[Base Prompt Template, str]]\nTemplate for the evaluation prompt. |\nscore_threshold\nfloat\nNumerical threshold for passing the evaluation, defaults to 4.0. |\nSource code in llama-index-core/llama_index/core/evaluation/correctness.py\n69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 |\nDataset Generator #\nBases: Prompt Mixin\nGenerate dataset (question/ question-answer pairs) based on the given documents.\nNOTE: this is a beta feature, subject to change!\nParameters:\n| Name | Type | Description | Default |\nnodes\nList[Node]\nList of nodes. (Optional) |\nrequired |"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_19",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "| Name | Type | Description | Default |\nnodes\nList[Node]\nList of nodes. (Optional) |\nrequired |\nllm\nLanguage model. |\ncallback_manager\nCallback Manager\nCallback manager. |\nnum_questions_per_chunk\nnumber of question to be generated per chunk. Each document is chunked of size 512 words. |\ntext_question_template\nBase Prompt Template | None\nQuestion generation template. |\nquestion_gen_query\nstr | None\nQuestion generation query. |\nSource code in llama-index-core/llama_index/core/evaluation/dataset_generation.py"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_20",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_21",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "from_documents\nclassmethod\nfrom_documents (documents: List[Document],\nllm: Optional[LLM] = None,\ntransformations: Optional[\nList[Transform Component]\n] = None,\ncallback_manager: Optional[Callback Manager] = None,\nnum_questions_per_chunk: int = 10,\ntext_question_template: (Base Prompt Template | None) = None,\ntext_qa_template: Base Prompt Template | None = None,\nquestion_gen_query: str | None = None,\nrequired_keywords: List[str] | None = None,\nexclude_keywords: List[str] | None = None,\nshow_progress: bool = False,) -> Dataset Generator\nGenerate dataset from documents.\nSource code in llama-index-core/llama_index/core/evaluation/dataset_generation.py\n165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 |\nagenerate_questions_from_nodes\nasync"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_22",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "agenerate_questions_from_nodes\nasync\nagenerate_questions_from_nodes (num: int | None = None,) -> List[str]\nGenerates questions for each document.\nSource code in llama-index-core/llama_index/core/evaluation/dataset_generation.py\nagenerate_dataset_from_nodes\nasync\nagenerate_dataset_from_nodes (num: int | None = None,) -> Query Response Dataset\nGenerates questions for each document.\nSource code in llama-index-core/llama_index/core/evaluation/dataset_generation.py\ngenerate_questions_from_nodes #\ngenerate_questions_from_nodes (num: int | None = None,) -> List[str]\nGenerates questions for each document.\nSource code in llama-index-core/llama_index/core/evaluation/dataset_generation.py\ngenerate_dataset_from_nodes #\ngenerate_dataset_from_nodes (num: int | None = None,) -> Query Response Dataset\nGenerates questions for each document."
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_23",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "Generates questions for each document.\nSource code in llama-index-core/llama_index/core/evaluation/dataset_generation.py\nQuery Response Dataset #\nBases: Base Model\nQuery Response Dataset.\nThe response can be empty if the dataset is generated from documents.\nParameters:\n| Name | Type | Description | Default |\nqueries\nDict[str, str]\nQuery id -> query. |\n<class 'dict'>\nresponses\nDict[str, str]\nQuery id -> response. |\n<class 'dict'>\nSource code in llama-index-core/llama_index/core/evaluation/dataset_generation.py\n48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 |\nfrom_qr_pairs\nclassmethod\nfrom_qr_pairs (qr_pairs: List[Tuple[str, str]]) -> Query Response Dataset\nCreate from qr pairs."
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_24",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "from_qr_pairs (qr_pairs: List[Tuple[str, str]]) -> Query Response Dataset\nCreate from qr pairs.\nSource code in llama-index-core/llama_index/core/evaluation/dataset_generation.py\nsave_json #\nsave_json (path: str) -> None\nSave json.\nSource code in llama-index-core/llama_index/core/evaluation/dataset_generation.py\nfrom_json\nclassmethod\nfrom_json (path: str) -> Query Response Dataset\nLoad json.\nSource code in llama-index-core/llama_index/core/evaluation/dataset_generation.py\nFaithfulness Evaluator #\nBases: Base Evaluator\nFaithfulness evaluator.\nEvaluates whether a response is faithful to the contexts (i.e. whether the response is supported by the contexts or hallucinated.)\nThis evaluator only considers the response string and the list of context strings.\nParameters:\n| Name | Type | Description | Default |\nraise_error"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_25",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "Parameters:\n| Name | Type | Description | Default |\nraise_error\nWhether to raise an error when the response is invalid. Defaults to False. |\nFalse\neval_template\nOptional[Union[str, Base Prompt Template]]\nThe template to use for evaluation. |\nrefine_template\nOptional[Union[str, Base Prompt Template]]\nThe template to use for refining the evaluation. |\nSource code in llama-index-core/llama_index/core/evaluation/faithfulness.py\n98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 |\naevaluate\nasync\naevaluate (query: str | None = None,"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_26",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "aevaluate\nasync\naevaluate (query: str | None = None,\nresponse: str | None = None,\ncontexts: Sequence[str] | None = None,\nsleep_time_in_seconds: int = 0,\n**kwargs: Any) -> Evaluation Result\nEvaluate whether the response is faithful to the contexts.\nSource code in llama-index-core/llama_index/core/evaluation/faithfulness.py\n159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 |\nGuideline Evaluator #\nBases: Base Evaluator\nGuideline evaluator.\nEvaluates whether a query and response pair passes the given guidelines.\nThis evaluator only considers the query string and the response string.\nParameters:\n| Name | Type | Description | Default |\nguidelines\nOptional[str]\nUser-added guidelines to use for evaluation. Defaults to None, which uses the default guidelines. |\neval_template"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_27",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "eval_template\nOptional[Union[str, Base Prompt Template]]\nThe template to use for evaluation. |\nSource code in llama-index-core/llama_index/core/evaluation/guideline.py\n41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 |\naevaluate\nasync\naevaluate (query: Optional[str] = None,\nresponse: Optional[str] = None,\ncontexts: Optional[Sequence[str]] = None,\nsleep_time_in_seconds: int = 0,\n**kwargs: Any) -> Evaluation Result\nEvaluate whether the query and response pair passes the guidelines.\nSource code in llama-index-core/llama_index/core/evaluation/guideline.py"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_28",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "Source code in llama-index-core/llama_index/core/evaluation/guideline.py\n89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 |\nPairwise Comparison Evaluator #\nBases: Base Evaluator\nPairwise comparison evaluator.\nEvaluates the quality of a response vs. a \"reference\" response given a question by having an LLM judge which response is better.\nOutputs whether the response\ngiven is better than the reference\nresponse.\nParameters:\n| Name | Type | Description | Default |\neval_template\nOptional[Union[str, Base Prompt Template]]\nThe template to use for evaluation. |\nenforce_consensus\nWhether to enforce consensus (consistency if we flip the order of the answers). Defaults to True. |\nSource code in llama-index-core/llama_index/core/evaluation/pairwise.py"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_29",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "Source code in llama-index-core/llama_index/core/evaluation/pairwise.py\n92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 |\nRelevancy Evaluator #\nBases: Base Evaluator\nRelenvancy evaluator."
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_30",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "Relevancy Evaluator #\nBases: Base Evaluator\nRelenvancy evaluator.\nEvaluates the relevancy of retrieved contexts and response to a query. This evaluator considers the query string, retrieved contexts, and response string.\nParameters:\n| Name | Type | Description | Default |\nraise_error\nOptional[bool]\nWhether to raise an error if the response is invalid. Defaults to False. |\nFalse\neval_template\nOptional[Union[str, Base Prompt Template]]\nThe template to use for evaluation. |\nrefine_template\nOptional[Union[str, Base Prompt Template]]\nThe template to use for refinement. |\nSource code in llama-index-core/llama_index/core/evaluation/relevancy.py"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_31",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "Source code in llama-index-core/llama_index/core/evaluation/relevancy.py\n42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 |\naevaluate\nasync\naevaluate (query: str | None = None,\nresponse: str | None = None,\ncontexts: Sequence[str] | None = None,\nsleep_time_in_seconds: int = 0,\n**kwargs: Any) -> Evaluation Result\nEvaluate whether the contexts and response are relevant to the query.\nSource code in llama-index-core/llama_index/core/evaluation/relevancy.py"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_32",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "Source code in llama-index-core/llama_index/core/evaluation/relevancy.py\n97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 |\nBase Retrieval Evaluator #\nBases: Base Model\nBase Retrieval Evaluator class.\nParameters:\n| Name | Type | Description | Default |\nmetrics\nList[Base Retrieval Metric]\nList of metrics to evaluate |\nrequired |\nSource code in llama-index-core/llama_index/core/evaluation/retrieval/base.py"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_33",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "required |\nSource code in llama-index-core/llama_index/core/evaluation/retrieval/base.py\n77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 |\nfrom_metric_names\nclassmethod\nfrom_metric_names (metric_names: List[str], **kwargs: Any) -> Base Retrieval Evaluator\nCreate evaluator from metric names.\nParameters:\n| Name | Type | Description | Default |\nmetric_names\nList[str]\nList of metric names |\nrequired |\n**kwargs\nAdditional arguments for the evaluator |"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_34",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "List[str]\nList of metric names |\nrequired |\n**kwargs\nAdditional arguments for the evaluator |\nSource code in llama-index-core/llama_index/core/evaluation/retrieval/base.py\n85 86 87 88 89 90 91 92 93 94 95 96 97 98 |\nevaluate #\nevaluate (query: str,\nexpected_ids: List[str],\nexpected_texts: Optional[List[str]] = None,\nmode: Retrieval Eval Mode = TEXT,\n**kwargs: Any) -> Retrieval Eval Result\nRun evaluation results with query string and expected ids.\nParameters:\n| Name | Type | Description | Default |\nquery\nQuery string |\nrequired |\nexpected_ids\nList[str]\nExpected ids |\nrequired |\nReturns:\n| Name | Type | Description |\nRetrieval Eval Result |\nRetrieval Eval Result\nEvaluation result |\nSource code in llama-index-core/llama_index/core/evaluation/retrieval/base.py\n107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 |\naevaluate\nasync"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_35",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "aevaluate\nasync\naevaluate (query: str,\nexpected_ids: List[str],\nexpected_texts: Optional[List[str]] = None,\nmode: Retrieval Eval Mode = TEXT,\n**kwargs: Any) -> Retrieval Eval Result\nRun evaluation with query string, retrieved contexts, and generated response string.\nSubclasses can override this method to provide custom evaluation logic and take in additional arguments.\nSource code in llama-index-core/llama_index/core/evaluation/retrieval/base.py\n137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 |\naevaluate_dataset\nasync\naevaluate_dataset (dataset: Embedding QAFinetune Dataset,\nworkers: int = 2,\nshow_progress: bool = False,\n**kwargs: Any) -> List[Retrieval Eval Result]\nRun evaluation with dataset.\nSource code in llama-index-core/llama_index/core/evaluation/retrieval/base.py"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_36",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "Source code in llama-index-core/llama_index/core/evaluation/retrieval/base.py\n172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 |\nRetrieval Eval Result #\nBases: Base Model\nRetrieval eval result.\nNOTE: this abstraction might change in the future.\nAttributes:\n| Name | Type | Description |\nParameters:\n| Name | Type | Description | Default |\nquery\nQuery string |\nrequired |\nexpected_ids\nList[str]\nExpected ids |\nrequired |\nexpected_texts\nList[str] | None\nExpected texts associated with nodes provided in |\nretrieved_ids\nList[str]\nRetrieved ids |\nrequired |\nretrieved_texts\nList[str]\nRetrieved texts |\nrequired |\nRetrieval Eval Mode\ntext or image |\n<Retrieval Eval Mode. TEXT: 'text'>\nmetric_dict\nDict[str, Retrieval Metric Result]\nMetric dictionary for the evaluation |\nrequired |"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_37",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "metric_dict\nDict[str, Retrieval Metric Result]\nMetric dictionary for the evaluation |\nrequired |\nSource code in llama-index-core/llama_index/core/evaluation/retrieval/base.py\n36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 |\nMulti Modal Retriever Evaluator #\nBases: Base Retrieval Evaluator\nRetriever evaluator.\nThis module will evaluate a retriever using a set of metrics.\nParameters:\n| Name | Type | Description | Default |\nmetrics\nList[Base Retrieval Metric]\nSequence of metrics to evaluate |\nrequired |\nretriever\nBase Retriever\nRetriever to evaluate. |\nrequired |\nnode_postprocessors\nList[Annotated[Base Node Postprocessor, Serialize As Any]] | None\nPost-processor to apply after retrieval. |\nSource code in llama-index-core/llama_index/core/evaluation/retrieval/evaluator.py"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_38",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "Source code in llama-index-core/llama_index/core/evaluation/retrieval/evaluator.py\n53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 |\nRetriever Evaluator #\nBases: Base Retrieval Evaluator\nRetriever evaluator.\nThis module will evaluate a retriever using a set of metrics.\nParameters:\n| Name | Type | Description | Default |\nmetrics\nList[Base Retrieval Metric]\nSequence of metrics to evaluate |\nrequired |\nretriever\nBase Retriever\nRetriever to evaluate. |\nrequired |\nnode_postprocessors\nList[Annotated[Base Node Postprocessor, Serialize As Any]] | None\nPost-processor to apply after retrieval. |\nSource code in llama-index-core/llama_index/core/evaluation/retrieval/evaluator.py\n16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 |\nMRR #"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_39",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "MRR #\nBases: Base Retrieval Metric\nMRR (Mean Reciprocal Rank) metric with two calculation options.\n- The default method calculates the reciprocal rank of the first relevant retrieved document.\n- The more granular method sums the reciprocal ranks of all relevant retrieved documents and divides by the count of relevant documents.\nAttributes:\n| Name | Type | Description |\nmetric_name |\nThe name of the metric. |\nParameters:\n| Name | Type | Description | Default |\nuse_granular_mrr\nFalse\nSource code in llama-index-core/llama_index/core/evaluation/retrieval/metrics.py\n83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 |\ncompute #"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_40",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "compute #\ncompute (query: Optional[str] = None,\nexpected_ids: Optional[List[str]] = None,\nretrieved_ids: Optional[List[str]] = None,\nexpected_texts: Optional[List[str]] = None,\nretrieved_texts: Optional[List[str]] = None,\n**kwargs: Any) -> Retrieval Metric Result\nCompute MRR based on the provided inputs and selected method.\nParameters#\nquery (Optional[str]): The query string (not used in the current implementation).\nexpected_ids (Optional[List[str]]): Expected document IDs.\nretrieved_ids (Optional[List[str]]): Retrieved document IDs.\nexpected_texts (Optional[List[str]]): Expected texts (not used in the current implementation).\nretrieved_texts (Optional[List[str]]): Retrieved texts (not used in the current implementation).\nRaises#\nValue Error: If the necessary IDs are not provided.\nReturns#\nRetrieval Metric Result: The result with the computed MRR score."
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_41",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "Returns#\nRetrieval Metric Result: The result with the computed MRR score.\nSource code in llama-index-core/llama_index/core/evaluation/retrieval/metrics.py\n99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 |\nHit Rate #\nBases: Base Retrieval Metric\nHit rate metric: Compute hit rate with two calculation options.\n- The default method checks for a single match between any of the retrieved docs and expected docs.\n- The more granular method checks for all potential matches between retrieved docs and expected docs.\nAttributes:\n| Name | Type | Description |\nmetric_name |\nThe name of the metric. |\nParameters:\n| Name | Type | Description | Default |\nuse_granular_hit_rate\nFalse"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_42",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "Parameters:\n| Name | Type | Description | Default |\nuse_granular_hit_rate\nFalse\nSource code in llama-index-core/llama_index/core/evaluation/retrieval/metrics.py\n16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 |\ncompute #\ncompute (query: Optional[str] = None,\nexpected_ids: Optional[List[str]] = None,\nretrieved_ids: Optional[List[str]] = None,\nexpected_texts: Optional[List[str]] = None,\nretrieved_texts: Optional[List[str]] = None,\n**kwargs: Any) -> Retrieval Metric Result\nCompute metric based on the provided inputs.\nParameters#\nquery (Optional[str]): The query string (not used in the current implementation).\nexpected_ids (Optional[List[str]]): Expected document IDs.\nretrieved_ids (Optional[List[str]]): Retrieved document IDs."
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_43",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "retrieved_ids (Optional[List[str]]): Retrieved document IDs.\nexpected_texts (Optional[List[str]]): Expected texts (not used in the current implementation).\nretrieved_texts (Optional[List[str]]): Retrieved texts (not used in the current implementation).\nRaises#\nValue Error: If the necessary IDs are not provided.\nReturns#\nRetrieval Metric Result: The result with the computed hit rate score.\nSource code in llama-index-core/llama_index/core/evaluation/retrieval/metrics.py\n32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 |\nRetrieval Metric Result #\nBases: Base Model\nMetric result.\nAttributes:\n| Name | Type | Description |\nParameters:\n| Name | Type | Description | Default |\nscore\nfloat\nScore for the metric |\nrequired |\nmetadata\nDict[str, Any]\nMetadata for the metric result |\n<class 'dict'>"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_44",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "required |\nmetadata\nDict[str, Any]\nMetadata for the metric result |\n<class 'dict'>\nSource code in llama-index-core/llama_index/core/evaluation/retrieval/metrics_base.py\n7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 |\nSemantic Similarity Evaluator #\nBases: Base Evaluator\nEmbedding similarity evaluator.\nEvaluate the quality of a question answering system by comparing the similarity between embeddings of the generated answer and the reference answer.\nInspired by this paper: - Semantic Answer Similarity for Evaluating Question Answering Models https://arxiv.org/pdf/2108.06130.pdf\nParameters:\n| Name | Type | Description | Default |\nsimilarity_threshold\nfloat\nEmbedding similarity threshold for \"passing\". Defaults to 0.8. |\nSource code in llama-index-core/llama_index/core/evaluation/semantic_similarity.py"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_45",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "Source code in llama-index-core/llama_index/core/evaluation/semantic_similarity.py\n13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 |\nEmbedding QAFinetune Dataset #\nBases: Base Model\nEmbedding QA Finetuning Dataset.\nParameters:\n| Name | Type | Description | Default |\nqueries\nDict[str, str]\nDict id -> query. |\nrequired |\ncorpus\nDict[str, str]\nDict id -> string. |\nrequired |\nrelevant_docs\nDict[str, List[str]]\nDict query id -> list of doc ids. |\nrequired |\n'text'\nSource code in llama-index-core/llama_index/core/llama_dataset/legacy/embedding.py\n16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 |\nquery_docid_pairs\nproperty\nquery_docid_pairs: List[Tuple[str, List[str]]]"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_46",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "query_docid_pairs\nproperty\nquery_docid_pairs: List[Tuple[str, List[str]]]\nGet query, relevant doc ids.\nsave_json #\nsave_json (path: str) -> None\nSave json.\nSource code in llama-index-core/llama_index/core/llama_dataset/legacy/embedding.py\nfrom_json\nclassmethod\nfrom_json (path: str) -> Embedding QAFinetune Dataset\nLoad json.\nSource code in llama-index-core/llama_index/core/llama_dataset/legacy/embedding.py\nget_retrieval_results_df #\nget_retrieval_results_df (names: List[str],\nresults_arr: List[List[Retrieval Eval Result]],\nmetric_keys: Optional[List[str]] = None,) -> Any\nDisplay retrieval results.\nSource code in llama-index-core/llama_index/core/evaluation/notebook_utils.py\n12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 |\nresolve_metrics #\nresolve_metrics (metrics: List[str],) -> List[Type[Base Retrieval Metric]]"
+  },
+  {
+    "chunk_id": "llamaindex_retrieval_chunk_47",
+    "framework": "LlamaIndex",
+    "topic": "retrieval",
+    "title": "LlamaIndex Retrieval",
+    "source_url": "https://developers.llamaindex.ai/python/framework-api-reference/evaluation/retrieval/",
+    "text": "resolve_metrics #\nresolve_metrics (metrics: List[str],) -> List[Type[Base Retrieval Metric]]\nResolve metrics from list of metric names.\nSource code in llama-index-core/llama_index/core/evaluation/retrieval/metrics.py\ngenerate_qa_embedding_pairs #\ngenerate_qa_embedding_pairs (nodes: List[Text Node],\nllm: Optional[LLM] = None,\nqa_generate_prompt_tmpl: str = DEFAULT_QA_GENERATE_PROMPT_TMPL,\nnum_questions_per_chunk: int = 2,) -> Embedding QAFinetune Dataset\nGenerate examples given a set of nodes.\nSource code in llama-index-core/llama_index/core/llama_dataset/legacy/embedding.py\n72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 |\noptions: members: - Base Retrieval Evaluator - Retriever Evaluator - Retrieval Eval Result"
+  },
+  {
+    "chunk_id": "llamaindex_indexing_chunk_1",
+    "framework": "LlamaIndex",
+    "topic": "indexing",
+    "title": "LlamaIndex Indexing",
+    "source_url": "https://developers.llamaindex.ai/python/framework/module_guides/indexing/",
+    "text": "Indexing\nConcept\nis a data structure that allows us to quickly retrieve relevant context for a user query.\nFor Llama Index, it's the core foundation for retrieval-augmented generation (RAG) use-cases.\nAt a high-level, Indexes\nare built from Documents.\nThey are used to build Query Engines and Chat Engines\nwhich enables question & answer and chat over your data.\nUnder the hood, Indexes\nstore data in Node\nobjects (which represent chunks of the original documents), and expose a Retriever interface that supports additional configuration and automation.\nThe most common index by far is the Vector Store Index; the best place to start is the Vector Store Index usage guide.\nFor other indexes, check out our guide to how each index works to help you decide which one matches your use-case.\nOther Index resources"
+  },
+  {
+    "chunk_id": "llamaindex_query-engine_chunk_1",
+    "framework": "LlamaIndex",
+    "topic": "query_engine",
+    "title": "LlamaIndex Query_Engine",
+    "source_url": "https://developers.llamaindex.ai/python/framework/module_guides/deploying/query_engine/",
+    "text": "Query Engine\nConcept\nA query engine takes in a natural language query, and returns a rich response. It is most often (but not always) built on one or many indexes via retrievers. You can compose multiple query engines to achieve more advanced capability.\nUsage Pattern\nTo stream response:\nSee the full usage pattern for more details.\nModules\nSupporting Modules"
+  },
+  {
+    "chunk_id": "llamaindex_evaluation_chunk_1",
+    "framework": "LlamaIndex",
+    "topic": "Evaluation",
+    "title": "LlamaIndex Evaluation",
+    "source_url": "https://developers.llamaindex.ai/python/framework/module_guides/evaluating/",
+    "text": "Evaluating\nConcept\nLlama Index offers key modules to measure the quality of generated results. We also offer key modules to measure retrieval quality.\n- Response Evaluation: Does the response match the retrieved context? Does it also match the query? Does it match the reference answer or guidelines?\n- Retrieval Evaluation: Are the retrieved sources relevant to the query?\nThis section describes how the evaluation components within Llama Index work.\nResponse Evaluation\nLlama Index offers LLM-based evaluation modules to measure the quality of results. This uses a \"gold\" LLM (e.g. GPT-4) to decide whether the predicted answer is correct in a variety of ways.\nNote that many of these current evaluation modules do not require ground-truth labels. Evaluation can be done with some combination of the query, context, response, and combine these with LLM calls."
+  },
+  {
+    "chunk_id": "llamaindex_evaluation_chunk_2",
+    "framework": "LlamaIndex",
+    "topic": "Evaluation",
+    "title": "LlamaIndex Evaluation",
+    "source_url": "https://developers.llamaindex.ai/python/framework/module_guides/evaluating/",
+    "text": "These evaluation modules are in the following forms:\n- Correctness: Whether the generated answer matches that of the reference answer given the query (requires labels).\n- Semantic Similarity Whether the predicted answer is semantically similar to the reference answer (requires labels).\n- Faithfulness: Evaluates if the answer is faithful to the retrieved contexts (in other words, whether if there's hallucination).\n- Context Relevancy: Whether retrieved context is relevant to the query.\n- Answer Relevancy: Whether the generated answer is relevant to the query.\n- Guideline Adherence: Whether the predicted answer adheres to specific guidelines.\nQuestion Generation\nRetrieval Evaluation"
+  },
+  {
+    "chunk_id": "llamaindex_evaluation_chunk_3",
+    "framework": "LlamaIndex",
+    "topic": "Evaluation",
+    "title": "LlamaIndex Evaluation",
+    "source_url": "https://developers.llamaindex.ai/python/framework/module_guides/evaluating/",
+    "text": "Question Generation\nRetrieval Evaluation\nThe concept of retrieval evaluation is not new; given a dataset of questions and ground-truth rankings, we can evaluate retrievers using ranking metrics like mean-reciprocal rank (MRR), hit-rate, precision, and more.\nThe core retrieval evaluation steps revolve around the following:\n- Dataset generation: Given an unstructured text corpus, synthetically generate (question, context) pairs.\n- Retrieval Evaluation: Given a retriever and a set of questions, evaluate retrieved results using ranking metrics.\nIntegrations\n- Up Train\n- Tonic Validate (Includes Web UI for visualizing results)\n- Deep Eval\n- Ragas\n- RAGChecker\n- Cleanlab\nUsage Pattern\nModules\nEvaluating with Labelled Rag Dataset\ndatasets, called Labelled Rag Dataset\n's see below:"
+  },
+  {
+    "chunk_id": "llamaindex_storing_chunk_1",
+    "framework": "LlamaIndex",
+    "topic": "storing",
+    "title": "LlamaIndex Storing",
+    "source_url": "https://developers.llamaindex.ai/python/framework/module_guides/storing/",
+    "text": "Storing\nConcept\nUnder the hood, Llama Index also supports swappable storage components that allows you to customize:\n- Document stores: where ingested documents (i.e.,\nobjects) are stored, - Index stores: where index metadata are stored,\n- Vector stores: where embedding vectors are stored.\n- Property Graph stores: where knowledge graphs are stored (i.e. for\nProperty Graph Index). - Chat Stores: where chat messages are stored and organized.\nThe Document/Index stores rely on a common Key-Value store abstraction, which is also detailed below.\nLlama Index supports persisting data to any storage backend supported by fsspec. We have confirmed support for the following storage backends:\n- Local filesystem\n- AWS S3\n- Cloudflare R2\nUsage Pattern\nSee our Vector Store Module Guide below for more details.\nNote that in general to use storage abstractions, you need to define a Storage Context\nobject:"
+  }
+]

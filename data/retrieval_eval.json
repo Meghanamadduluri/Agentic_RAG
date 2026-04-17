@@ -1,0 +1,62 @@
+[
+    {
+      "query": "How do I define a tool using the @tool decorator?",
+      "entity": "LangChain",
+      "expected_topic": "agents"
+    },
+    {
+      "query": "What is the purpose of the VectorStoreIndex?",
+      "entity": "LlamaIndex",
+      "expected_topic": "indexing"
+    },
+    {
+      "query": "What decorator is used to create middleware to customize how tool errors are handled?",
+      "entity": "LangChain",
+      "expected_topic": "agents"
+    },
+    {
+      "query": "How do the evaluation components work?",
+      "entity": "LlamaIndex",
+      "expected_topic": "Evaluation"
+    },
+    {
+      "query": "What is the syntax for the astream method for events?",
+      "entity": "LangChain",
+      "expected_topic": "streaming"
+    },
+    {
+      "query": "How do I implement aevaluate?",
+      "entity": "LlamaIndex",
+      "expected_topic": "retrieval"
+    },
+    {
+      "query": "How do I use the create_retrieval_chain utility?",
+      "entity": "LangChain",
+      "expected_topic": "retrieval"
+    },
+    {
+      "query": "How does tree index work?",
+      "entity": "LlamaIndex",
+      "expected_topic": "indexing"
+    },
+    {
+      "query": "How do I set up a ReAct agent?",
+      "entity": "LlamaIndex",
+      "expected_topic": "agents"
+    },
+    {
+      "query": "How do I stream LLM tokens?",
+      "entity": "LangChain",
+      "expected_topic": "streaming"
+    },
+    {
+      "query": "How do I connect to a Pinecone vector store?",
+      "entity": "LlamaIndex",
+      "expected_topic": "storing"
+    },
+    {
+      "query": "How do I use the Parent Document Retriever?",
+      "entity": "LangChain",
+      "expected_topic": "retrieval"
+    }
+  ]

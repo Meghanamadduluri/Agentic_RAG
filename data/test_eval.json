@@ -1,0 +1,74 @@
+[
+    {
+      "query": "Compare LangChain vs LlamaIndex for building RAG pipelines.",
+      "task_type": "comparison",
+      "entities": ["LangChain", "LlamaIndex"],
+      "expected_aspects": ["retrieval", "indexing", "synthesis"]
+    },
+    {
+      "query": "How does memory management differ between LangChain and LlamaIndex?",
+      "task_type": "comparison",
+      "entities": ["LangChain", "LlamaIndex"],
+      "expected_aspects": ["short-term-memory", "history", "persistence"]
+    },
+    {
+      "query": "LangChain vs LlamaIndex: which is more efficient for high-volume data indexing?",
+      "task_type": "comparison",
+      "entities": ["LangChain", "LlamaIndex"],
+      "expected_aspects": ["indexing", "storing", "performance"]
+    },
+    {
+        "query": "Compare the response synthesis strategies of LlamaIndex and LangChain.",
+        "task_type": "comparison",
+        "entities": ["LangChain", "LlamaIndex"],
+        "expected_aspects": ["response-synthesizers", "retrieval", "output quality"]
+    },
+    {
+        "query": "How do LangChain and LlamaIndex handle tool definition for agents?",
+        "task_type": "comparison",
+        "entities": ["LangChain", "LlamaIndex"],
+        "expected_aspects": ["agents", "tooling", "integration"]
+    },
+    {
+        "query": "Compare the developer ergonomics of LangChain vs LlamaIndex for a simple QA bot.",
+        "task_type": "comparison",
+        "entities": ["LangChain", "LlamaIndex"],
+        "expected_aspects": ["ease of use", "abstractions", "getting started"]
+    },
+    {
+      "query": "I need streaming responses for my chatbot. Should I use LangChain or LlamaIndex?",
+      "task_type": "decision",
+      "entities": ["LangChain", "LlamaIndex"],
+      "expected_aspects": ["streaming", "real-time", "UX"]
+    },
+    {
+      "query": "Which framework provides more flexible document retrievers?",
+      "task_type": "decision",
+      "entities": ["LangChain", "LlamaIndex"],
+      "expected_aspects": ["retrieval", "search algorithms"]
+    },
+    {
+        "query": "Which framework is better for complex agentic workflows?",
+        "task_type": "decision",
+        "entities": ["LangChain", "LlamaIndex"],
+        "expected_aspects": ["agents", "tool use", "reasoning"]
+    },
+    {
+      "query": "I am building a production RAG system; which framework has better storage integrations?",
+      "task_type": "decision",
+      "entities": ["LangChain", "LlamaIndex"],
+      "expected_aspects": ["storing", "database support", "production readiness"]
+    },
+    {
+      "query": "Which framework is better for handling multi-step reasoning tasks?",
+      "task_type": "decision",
+      "entities": ["LangChain", "LlamaIndex"],
+      "expected_aspects": ["agents", "reasoning", "chaining"]
+    },
+    {
+      "query": "Evaluate LlamaIndex vs LangChain for specialized hierarchical indexing.",
+      "task_type": "comparison",
+      "entities": ["LangChain", "LlamaIndex"],
+      "expected_aspects": ["indexing", "hierarchy", "structure"]
+    }
+  ]

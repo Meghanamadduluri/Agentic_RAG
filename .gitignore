@@ -1,0 +1,21 @@
+# --- Project Specific ---
+.env
+data/chroma_db/
+results/
+*.log
+
+# --- Python ---
+__pycache__/
+.venv/
+env/
+*.py[cod]
+*$py.class
+dist/
+build/
+*.egg-info/
+
+# --- Operating System & IDE ---
+.DS_Store
+.vscode/
+.idea/
+.ipynb_checkpoints/
